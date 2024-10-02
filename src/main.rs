@@ -42,7 +42,17 @@ static UPSTREAM_CONNECTION_FAILURES: Lazy<IntCounter> = Lazy::new(|| {
 fn main() {
 	let conf = config::Config::new();
 
-	trace::configure_logging().init();
+	let logging = match trace::configure_logging() {
+		Ok(l) => l,
+		Err(e) => {
+			eprintln!("Error: {e}");
+			e.chain()
+				.skip(1)
+				.for_each(|cause| eprintln!("because: {}", cause));
+			std::process::exit(1);
+		},
+	};
+	logging.init();
 	info!("started proxy{:#?}", &conf);
 	let mut amplitrude_proxy = Server::new(Some(Opt {
 		upgrade: false,
