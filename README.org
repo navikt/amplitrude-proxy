@@ -1,6 +1,6 @@
 * Ampritude-proxy
 
-A reverse proxy in front of Amplitude and Umami. It redacts some data and annotates requests with other data.
+A reverse proxy in front of Amplitude. It redacts some data and annotates requests with other data.
 This tries to be, morally, a reverse proxy and not a custom ingestion service.
 As such, we try to avoid a having knowledge about upstreams and downstreams.
 
@@ -13,9 +13,8 @@ Configured development environment requires:
 2. Rust configured IDE of choice
 
 *** How to Run Locally
-TODO: Fix/specify how to change ports, currently hardcoded.
 
-1. Start an echo server:
+1. Start an echo server of your choice, here we use socat for no particular reason:
    #+BEGIN_SRC sh
    socat -v -d -d tcp-l:1234,crlf,reuseaddr,fork system:"
    echo HTTP/1.1 200 OK;
@@ -29,7 +28,7 @@ TODO: Fix/specify how to change ports, currently hardcoded.
 
    you can also use http-bin or similar.
 
-2. Start the program, you need to set umami and amplitude envs first.
+2. Start the program, you need to set amplitude envs first.
    #+BEGIN_SRC sh
    cargo watch -qx 'run'  ;; or just `cargo run`
    #+END_SRC

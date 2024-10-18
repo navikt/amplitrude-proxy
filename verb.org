@@ -5,23 +5,7 @@
 post http://localhost:6191/dump/request
 Content-Type: application/json; charset=utf-8
 
-* Hostname :verb:
-post http://amplitude.nav.no/umami
-Accept: application/json
-Content-Type: application/json; charset=utf-8
-
-{"type": "event",
-  "payload": {
-    "website":"0a0bc436-1eac-45ac-81ab-697ab77ebec1",
-    "hostname":"lekk.ansatt.nav.no",
-    "screen":"3840x1600",
-    "language":"en-GB",
-    "title":"Lekk%20-%20Kari%20Nordmann%20(fnr:%2023031510135)",
-    "url": "no",
-    "referrer":"https://login.microsoftonline.com/"
-  }
-}
-* large request -  yes error                                           :verb:
+* larger request                                                       :verb:
 
 post http://localhost:6191/dump/request
 Accept: application/json
@@ -262,7 +246,7 @@ GET http://localhost:9090/metrics
 Content-Type: application/json
 Accept: application/json
 
-* umami  :verb:
+* collect                                                              :verb:
 
 POST http://localhost:3000/api/collect
 Content-Type: application/json

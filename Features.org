@@ -10,8 +10,6 @@
 ** DONE Is-Bot ;;
 ** DONE that kafka-ingress stuff they do
 
-** DONE Forward headers for umami
-
 * Todo
 ** DONE Deployment
 ** DONE Probes

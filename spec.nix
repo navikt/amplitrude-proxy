@@ -48,10 +48,7 @@ let
         external = [
           { host = "api.eu.amplitude.com"; }
           { host = "cdn.amplitude.com"; }
-          { host = "umami.nav.no"; }
         ];
-        # # TODO: Is it worth re-programming umami proxy not to go out onto internet and back?
-        # rules = [{inherit namespace; "application" = "reops-umami-beta";}];
       };
       resources = {
         limits.memory = "1024Mi";
@@ -65,9 +62,6 @@ let
         AMPLITUDE_HOST = "api.eu.amplitude.com";
         AMPLITUDE_PORT = "443";
         AMPLITUDE_SNI = AMPLITUDE_HOST;
-        UMAMI_HOST = "umami.nav.no";
-        UMAMI_PORT = "443";
-        UMAMI_SNI = UMAMI_HOST;
       };
       envFrom = [{ secret = "amplitude-keys"; }];
     };
