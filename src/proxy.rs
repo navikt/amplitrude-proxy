@@ -327,7 +327,7 @@ impl ProxyHttp for AmplitudeProxy {
 	where
 		Self::CTX: Send + Sync,
 	{
-		info!(
+		trace!(
 			"status: {}, reason {:?}, {} - Origin: {}",
 			upstream_response.status,
 			upstream_response.get_reason_phrase(),
