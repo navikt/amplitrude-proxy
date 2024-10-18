@@ -28,9 +28,7 @@ use crate::k8s::{
 	self,
 	cache::{self, INITIALIZED},
 };
-use crate::metrics::{
-	HANDLED_REQUESTS, INCOMING_REQUESTS, INVALID_PEER, PROXY_ERRORS, UPSTREAM_PEER,
-};
+use crate::metrics::{HANDLED_REQUESTS, INCOMING_REQUESTS, INVALID_PEER, PROXY_ERRORS};
 pub struct AmplitudeProxy {
 	pub conf: Config,
 	pub addr: std::net::SocketAddr,
@@ -185,56 +183,28 @@ impl ProxyHttp for AmplitudeProxy {
 	async fn upstream_peer(
 		&self,
 		_session: &mut Session,
-		ctx: &mut Self::CTX,
+		_ctx: &mut Self::CTX,
 	) -> Result<Box<HttpPeer>> {
-		let path = match &ctx.route {
-			route::Route::Umami(s)
-			| route::Route::Amplitude(s)
-			| route::Route::AmplitudeCollect(s)
-			| route::Route::Unexpected(s) => s,
-		};
-		UPSTREAM_PEER.with_label_values(&[path]).inc();
+		let mut peer = Box::new(HttpPeer::new(
+			format!(
+				"{}:{}",
+				self.conf.upstream_amplitude.host, self.conf.upstream_amplitude.port
+			)
+			.to_socket_addrs()
+			.expect("Amplitude specified `host` & `port` should give valid `std::net::SocketAddr`")
+			.next()
+			.expect("SocketAddr should resolve to at least 1 IP address"),
+			self.conf.upstream_amplitude.sni.is_some(),
+			self.conf.upstream_amplitude.sni.clone().unwrap_or_default(),
+		));
 
-		if let route::Route::Umami(_) = &ctx.route {
-			let peer = Box::new(HttpPeer::new(
-				format!(
-					"{}:{}",
-					self.conf.upstream_umami.host, self.conf.upstream_umami.port
-				)
-				.to_socket_addrs()
-				.expect("Umami specified `host` & `port` should give valid `std::net::SocketAddr`")
-				.next()
-				.expect("SocketAddr should resolve to at least 1 IP address"),
-				self.conf.upstream_umami.sni.is_some(),
-				self.conf.upstream_umami.sni.clone().unwrap_or_default(),
-			));
+		peer.options.tcp_keepalive = Some(pingora::protocols::TcpKeepalive {
+			idle: std::time::Duration::from_secs(120),
+			interval: std::time::Duration::from_secs(5),
+			count: 3,
+		});
 
-			Ok(peer)
-		} else {
-			let mut peer = Box::new(HttpPeer::new(
-				format!(
-					"{}:{}",
-					self.conf.upstream_amplitude.host, self.conf.upstream_amplitude.port
-				)
-				.to_socket_addrs()
-				.expect(
-					"Amplitude specified `host` & `port` should give valid `std::net::SocketAddr`",
-				)
-				.next()
-				.expect("SocketAddr should resolve to at least 1 IP address"),
-				self.conf.upstream_amplitude.sni.is_some(),
-				self.conf.upstream_amplitude.sni.clone().unwrap_or_default(),
-			));
-
-			// Are these reasonable keepalive values?
-			peer.options.tcp_keepalive = Some(pingora::protocols::TcpKeepalive {
-				idle: std::time::Duration::from_secs(120),
-				interval: std::time::Duration::from_secs(5),
-				count: 3,
-			});
-
-			Ok(peer)
-		}
+		Ok(peer)
 	}
 
 	async fn request_body_filter(
@@ -385,38 +355,10 @@ impl ProxyHttp for AmplitudeProxy {
 			.expect("Needs correct transfer-encoding scheme header set");
 
 		match &ctx.route {
-			route::Route::Umami(_) => {
-				upstream_request
-					.insert_header("Host", "umami.nav.no")
-					.expect("Needs correct Host header");
-
-				// We are using vercel headers here because Umami supports them
-				// and they are not configurable on umamis side. We already have this info in the request
-				// as x-client-city, x-client-countrlly but umami does not support those names.
-				// (umami also supports Cloudflare headers, which we aren't (but could be) using )
-				if let Some(loc) = &ctx.location {
-					upstream_request
-						.insert_header("X-Vercel-IP-Country", &loc.country)
-						.expect("Set geo-location header (country) for umami");
-
-					upstream_request
-						.insert_header("X-Vercel-City", &loc.city)
-						.expect("Set geo-location header (city) for umami");
-				}
-			},
 			route::Route::Amplitude(_) | route::Route::AmplitudeCollect(_) => {
 				upstream_request
 					.insert_header("Host", "api.eu.amplitude.com")
 					.expect("Needs correct Host header");
-			},
-			route::Route::Unexpected(_) => {},
-		}
-
-		match &ctx.route {
-			route::Route::Umami(_) => {
-				upstream_request.set_uri(Uri::from_static("/api/send"));
-			},
-			route::Route::Amplitude(_) | route::Route::AmplitudeCollect(_) => {
 				upstream_request.set_uri(Uri::from_static("/2/httpapi"));
 			},
 			route::Route::Unexpected(_) => {},
@@ -425,13 +367,10 @@ impl ProxyHttp for AmplitudeProxy {
 		Ok(())
 	}
 
-	async fn logging(&self, session: &mut Session, e: Option<&Error>, ctx: &mut Self::CTX)
+	async fn logging(&self, session: &mut Session, e: Option<&Error>, _ctx: &mut Self::CTX)
 	where
 		Self::CTX: Send + Sync,
 	{
-		// TODO: Wrap this into a prometheus metric
-		let proxy_duration = ctx.proxy_start.map(|start_time| start_time.elapsed());
-
 		let Some(err) = e else {
 			// happy path
 			HANDLED_REQUESTS.inc();
