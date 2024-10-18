@@ -26,8 +26,6 @@ Configured development environment requires:
    socat -v tcp-l:1234,fork exec:"'$(realpath cat)'"
    #+END_SRC
 
-   you can also use http-bin or similar.
-
 2. Start the program, you need to set amplitude envs first.
    #+BEGIN_SRC sh
    cargo watch -qx 'run'  ;; or just `cargo run`
@@ -42,5 +40,3 @@ Configured development environment requires:
      #+BEGIN_SRC sh
      curl -v -H'user-agent: nav-developer' 'localhost:6191/nav123456/abcdef123456/test654321/a1b2c3d4e5?regularstring=123456&anotherString=12345'
      #+END_SRC
-     This should print the following string in the `socat` terminal:
-     + `GET /nav123456/[redacted]/test654321/[redacted]?regularstring=[redacted]&anotherString=12345 HTTP/1.1\r`
