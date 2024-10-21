@@ -255,48 +255,14 @@ impl ProxyHttp for AmplitudeProxy {
 						.map_err(|e| *e)?
 				};
 
-				let platform = get_platform(&json);
-				if platform.is_none() {
-					annotate::with_key(&mut json, self.conf.amplitude_api_key_prod.clone());
-				}
-
 				redact::traverse_and_redact(&mut json);
 				annotate::with_proxy_version(
 					&mut json,
 					&format!("{}-{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),
 				);
 
-				if let Some(app) =
-					cache::get_app_info_with_longest_prefix(&platform.unwrap_or_default())
-				{
-					annotate::with_app_info(&mut json, &app, &ctx.ingress);
-					annotate::with_key(&mut json, self.conf.amplitude_api_key_prod.clone());
-				} else {
-					let env = categorize_other_environment(
-						ctx.ingress.clone(),
-						&["dev.nav.no".into(), "localhost".into()],
-					);
-					// This is a a hack, really
-					match env.as_ref() {
-						"localhost" => {
-							annotate::with_key(
-								&mut json,
-								self.conf.amplitude_api_key_local_systems.clone(),
-							);
-						},
-						"dev" => {
-							annotate::with_key(&mut json, self.conf.amplitude_api_key_dev.clone());
-							// smaller app info
-						},
-						_ => {
-							annotate::with_key(
-								&mut json,
-								self.conf.amplitude_api_key_other_systems.clone(),
-							);
-						},
-					}
-				}
-
+				trace!("context: {:?}", get_context(&mut json));
+				annotate_with_api_key(&self.conf, &mut json, &ctx);
 				// This uses exactly "event_properties, which maybe only amplitude has"
 				if let Some(loc) = &ctx.location {
 					annotate::with_location(&mut json, &loc.city, &loc.country);
@@ -441,6 +407,39 @@ fn parse_url_encoded(data: &str) -> Result<Value, pingora::Error> {
 	Ok(json!({ "events": events_data, "api-key": client }))
 }
 
+fn annotate_with_api_key(conf: &Config, json: &mut Value, ctx: &Ctx) {
+	let platform = get_platform(json);
+	if platform.is_none() {
+		annotate::with_key(json, conf.amplitude_api_key_prod.clone());
+	}
+
+	if let Some(app) = cache::get_app_info_with_longest_prefix(&platform.unwrap_or_default()) {
+		annotate::with_app_info(json, &app, &ctx.ingress);
+		annotate::with_key(json, conf.amplitude_api_key_prod.clone());
+	} else {
+		let env = categorize_other_environment(
+			ctx.ingress.clone(),
+			&["dev.nav.no".into(), "localhost".into()],
+		);
+
+		match env.as_ref() {
+			"localhost" => {
+				annotate::with_key(json, conf.amplitude_api_key_local_systems.clone());
+			},
+			"dev" => {
+				annotate::with_key(json, conf.amplitude_api_key_dev.clone());
+			},
+			_ => {
+				annotate::with_key(json, conf.amplitude_api_key_other_systems.clone());
+			},
+		}
+	}
+}
+
+fn normalize_url(url: &str) -> String {
+	url.replace("intern.dev.", "").replace(".dev", "")
+}
+
 fn get_platform(value: &Value) -> Option<String> {
 	value
 		.get("events")
@@ -455,6 +454,19 @@ fn get_platform(value: &Value) -> Option<String> {
 		})
 }
 
+fn get_context(value: &Value) -> Option<String> {
+	value
+		.get("events")
+		.and_then(|v| v.as_array())
+		.and_then(|events| {
+			events.iter().find_map(|event| {
+				event
+					.get("context")
+					.and_then(|v| v.as_str())
+					.map(String::from)
+			})
+		})
+}
 fn categorize_other_environment(host: String, environments: &[String]) -> String {
 	if environments.iter().any(|env| host.ends_with(env)) {
 		"dev".into()
