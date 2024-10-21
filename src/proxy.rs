@@ -261,7 +261,7 @@ impl ProxyHttp for AmplitudeProxy {
 					&format!("{}-{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),
 				);
 
-				trace!("context: {:?}", get_context(&mut json));
+				info!("context: {:?}", get_context(&mut json));
 				annotate_with_api_key(&self.conf, &mut json, &ctx);
 				// This uses exactly "event_properties, which maybe only amplitude has"
 				if let Some(loc) = &ctx.location {
