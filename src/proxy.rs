@@ -210,7 +210,6 @@ impl ProxyHttp for AmplitudeProxy {
 	async fn request_body_filter(
 		&self,
 		session: &mut Session,
-		body: &mut Option<Bytes>,
 		end_of_stream: bool,
 		ctx: &mut Self::CTX,
 	) -> Result<()>
@@ -286,6 +285,7 @@ impl ProxyHttp for AmplitudeProxy {
 						},
 						"dev" => {
 							annotate::with_key(&mut json, self.conf.amplitude_api_key_dev.clone());
+							// smaller app info
 						},
 						_ => {
 							annotate::with_key(
@@ -327,7 +327,7 @@ impl ProxyHttp for AmplitudeProxy {
 	where
 		Self::CTX: Send + Sync,
 	{
-		trace!(
+		info!(
 			"status: {}, reason {:?}, {} - Origin: {}",
 			upstream_response.status,
 			upstream_response.get_reason_phrase(),
