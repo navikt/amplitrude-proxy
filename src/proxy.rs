@@ -210,6 +210,7 @@ impl ProxyHttp for AmplitudeProxy {
 	async fn request_body_filter(
 		&self,
 		session: &mut Session,
+		body: &mut Option<Bytes>,
 		end_of_stream: bool,
 		ctx: &mut Self::CTX,
 	) -> Result<()>
