@@ -260,9 +260,10 @@ impl ProxyHttp for AmplitudeProxy {
 				);
 
 				redact::traverse_and_redact(&mut json);
-
 				info!("context: {:?}", get_context(&mut json));
 				info!("platform: {:?}", get_platform(&mut json));
+				info!("source_name: {:?}", get_source_name(&mut json));
+
 				annotate_with_api_key(&self.conf, &mut json, &ctx);
 				// This uses exactly "event_properties, which maybe only amplitude has"
 				if let Some(loc) = &ctx.location {
@@ -468,6 +469,22 @@ fn get_context(value: &Value) -> Option<String> {
 			})
 		})
 }
+
+fn get_source_name(value: &Value) -> Option<String> {
+	value
+		.get("events")
+		.and_then(|v| v.as_array())
+		.and_then(|events| {
+			events.iter().find_map(|event| {
+				event
+					.get("ingestion_metadata")
+					.and_then(|metadata| metadata.get("source_name"))
+					.and_then(|v| v.as_str())
+					.map(String::from)
+			})
+		})
+}
+
 fn categorize_other_environment(host: String, environments: &[String]) -> String {
 	if environments.iter().any(|env| host.ends_with(env)) {
 		"dev".into()
