@@ -3,11 +3,29 @@ use serde_json::Value;
 use crate::k8s;
 
 pub fn with_proxy_version(event: &mut Value, proxy_version: &str) {
-	if let Value::Object(map) = event {
-		map.insert(
-			"proxyVersion".to_string(),
-			Value::String(proxy_version.to_string()),
-		);
+	match event {
+		Value::Array(arr) => {
+			for v in arr {
+				with_proxy_version(v, proxy_version);
+			}
+		},
+		Value::Object(obj) => {
+			for (key, v) in obj.iter_mut() {
+				if key == "event_properties" && v.is_object() {
+					let inner_object = v.as_object_mut().expect(
+						"Should be possible to get a mutable reference to the inner object",
+					);
+					inner_object.insert(
+						"proxyVersion".into(),
+						Value::String(proxy_version.to_string()),
+					);
+				}
+			}
+		},
+
+		_ => {
+			// No need to do anything for these types
+		},
 	}
 }
 
@@ -157,27 +175,11 @@ mod tests {
 			"event_type": "button_click",
 			"event_properties": {
 				"button_name": "signup_button",
-				"color": "blue"
+				"color": "blue",
+				"proxyVersion": "1.2.3"
+
 			},
 			"session_id": 16789,
-			"proxyVersion": "1.2.3"  // The new field added
-		});
-
-		assert_eq!(event, expected_event);
-	}
-
-	#[test]
-	fn test_annotate_proxy_version_overwrite() {
-		let mut event = json!({
-			"user_id": "12345",
-			"proxyVersion": "1.0.0"
-		});
-
-		with_proxy_version(&mut event, "2.0.0");
-
-		let expected_event = json!({
-			"user_id": "12345",
-			"proxyVersion": "2.0.0"  // The field should be updated to 2.0.0
 		});
 
 		assert_eq!(event, expected_event);
