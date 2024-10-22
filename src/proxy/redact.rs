@@ -1,17 +1,10 @@
 use std::collections::HashSet;
 
+use http::Uri;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::Value;
-
-#[derive(Debug, PartialEq, Eq)]
-pub enum Rule {
-	Redact,             // Replace the string w/[Redacted]
-	RedactSsns(String), // Replace SSN substrings with the string [Redacted]
-	Keep(String),
-	Original(String),
-	Obfuscate(String), // Remove client IP, replace w/ours
-}
+use url::Url;
 
 static KEEP_REGEX: Lazy<regex::Regex> = Lazy::new(|| {
 	Regex::new(r"((nav|test)[0-9]{6})").expect("Hard-coded regex expression should be valid")
@@ -22,6 +15,15 @@ static HEX_REGEX: Lazy<regex::Regex> = Lazy::new(|| {
 static ID_REGEX: Lazy<regex::Regex> = Lazy::new(|| {
 	Regex::new(r"\d[oiA-Z0-9]{8,}").expect("Hard-coded regex expression should be valid")
 });
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Rule {
+	Redact,             // Replace the string w/[Redacted]
+	RedactSsns(String), // Replace SSN substrings with the string [Redacted]
+	Keep(String),
+	Original(String),
+	Obfuscate(String), // Remove client IP, replace w/ours
+}
 
 impl Rule {
 	pub fn pretty_print(&self) -> String {
@@ -36,6 +38,9 @@ impl Rule {
 			Self::Keep(s) | Self::Original(s) | Self::Obfuscate(s) => s.to_string(),
 			Self::Redact => redacted.to_string(),
 		}
+	}
+	pub(crate) fn new(s: &str) -> Self {
+		redact(s)
 	}
 }
 
@@ -87,6 +92,52 @@ pub fn traverse_and_redact(value: &mut Value) {
 			// No need to do anything for these types
 		},
 	}
+}
+
+fn redact_paths(ps: &[&str]) -> Vec<Rule> {
+	ps.iter().map(|p: &&str| Rule::new(p)).collect()
+}
+
+fn redact_queries(ss: &[(&str, &str)]) -> Vec<(Rule, Rule)> {
+	ss.iter()
+		.map(|q| (Rule::new(q.0), Rule::new(q.1)))
+		.collect()
+}
+
+fn print_query((key, value): &(Rule, Rule)) -> String {
+	format!("{}={}", key.pretty_print(), value.pretty_print())
+}
+
+pub fn redact_uri(old_uri: &Url) -> Url {
+	let redacted_paths = itertools::join(
+		redact_paths(&old_uri.path().split('/').collect::<Vec<_>>())
+			.iter()
+			.map(|p| p.pretty_print()),
+		"/",
+	);
+
+	let redacted_queries = itertools::join(
+		redact_queries(
+			&old_uri
+				.query()
+				.unwrap_or("")
+				.split('&')
+				.filter_map(|q| q.split_once('='))
+				.collect::<Vec<_>>(),
+		)
+		.iter()
+		.map(print_query),
+		"&",
+	);
+
+	let query_params = if old_uri.query().is_some_and(|q| !q.is_empty()) {
+		format!("?{redacted_queries}")
+	} else {
+		String::new()
+	};
+	format!("{redacted_paths}{query_params}")
+		.parse::<Url>()
+		.unwrap()
 }
 
 fn redact(s: &str) -> Rule {

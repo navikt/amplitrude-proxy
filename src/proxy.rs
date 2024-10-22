@@ -9,6 +9,7 @@ use pingora::{
 	proxy::{ProxyHttp, Session},
 	Error, OrErr, Result,
 };
+use redact::redact_uri;
 use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::net::ToSocketAddrs;
@@ -421,6 +422,10 @@ fn annotate_with_api_key(conf: &Config, json: &mut Value, ctx: &Ctx) {
 		platform_str.and_then(|s| Url::parse(&s).ok())
 	};
 
+	if let Some(url) = &platform {
+		let url = redact_uri(&url);
+		annotate::with_urls(json, &url, &ctx.host);
+	}
 	// SUS
 	if platform.is_none() {
 		annotate::with_key(json, conf.amplitude_api_key_prod.clone());

@@ -67,6 +67,41 @@ pub fn with_app_info(event: &mut Value, app_info: &k8s::cache::AppInfo, host: &S
 	}
 }
 
+pub fn with_urls(event: &mut Value, url: &Url, hostname: &str) {
+	match event {
+		Value::Object(obj) => {
+			obj.get_mut("events")
+				.and_then(|events| events.as_array_mut())
+				.map(|events_array| {
+					events_array.iter_mut().for_each(|event_obj| {
+						event_obj
+							.as_object_mut()
+							.and_then(|event_obj_map| event_obj_map.get_mut("event_properties"))
+							.and_then(|event_properties| event_properties.as_object_mut())
+							.map(|inner_object| {
+								inner_object.insert("url".into(), Value::String(url.to_string()));
+								inner_object.insert(
+									"hostname".into(),
+									Value::String(url.host_str().unwrap_or("").into()),
+								);
+								inner_object
+									.insert("pagePath".into(), Value::String(url.path().into()));
+								inner_object.insert("hostname".into(), hostname.clone().into());
+							});
+					});
+				});
+		},
+		Value::Array(arr) => {
+			for v in arr {
+				with_urls(v, url, hostname);
+			}
+		},
+		_ => {
+			// No need to do anything for these types
+		},
+	}
+}
+
 pub fn with_location(value: &mut Value, city: &String, country: &String) {
 	match value {
 		Value::Array(arr) => {
