@@ -411,12 +411,23 @@ fn parse_url_encoded(data: &str) -> Result<Value, pingora::Error> {
 }
 
 fn annotate_with_api_key(conf: &Config, json: &mut Value, ctx: &Ctx) {
-	let platform = get_platform(json);
+	let platform: Option<Url> = {
+		let platform_str = if is_using_new_sdk(json) {
+			get_source_name(json)
+		} else {
+			get_platform(json)
+		};
+		platform_str.and_then(|s| Url::parse(&s).ok())
+	};
+
+	// SUS!
 	if platform.is_none() {
 		annotate::with_key(json, conf.amplitude_api_key_prod.clone());
 	}
 
-	if let Some(app) = cache::get_app_info_with_longest_prefix(&platform.unwrap_or_default()) {
+	if let Some(app) = cache::get_app_info_with_longest_prefix(
+		&platform.map(|x| x.to_string()).unwrap_or("web".into()),
+	) {
 		annotate::with_app_info(json, &app, &ctx.ingress);
 		annotate::with_key(json, conf.amplitude_api_key_prod.clone());
 	} else {
@@ -494,6 +505,17 @@ fn categorize_other_environment(host: String, environments: &[String]) -> String
 	} else {
 		"other".into()
 	}
+}
+
+fn is_using_new_sdk(event: &Value) -> bool {
+	if let Some(body) = event.get("body") {
+		if body.get("events").is_some() && body.get("api_key").is_some() {
+			return true;
+		} else if body.get("e").is_some() && body.get("client").is_some() {
+			return false;
+		}
+	}
+	false
 }
 
 #[cfg(test)]
