@@ -1,8 +1,3 @@
-use std::collections::HashMap;
-use std::net::ToSocketAddrs;
-use std::str::FromStr;
-use std::sync::atomic::Ordering;
-
 use async_trait::async_trait;
 use bytes::Bytes;
 use http::Uri;
@@ -15,8 +10,13 @@ use pingora::{
 	Error, OrErr, Result,
 };
 use serde_json::{json, Value};
+use std::collections::HashMap;
+use std::net::ToSocketAddrs;
+use std::str::FromStr;
+use std::sync::atomic::Ordering;
 use tokio::time;
 use tracing::{error, info, trace, warn};
+use url::Url;
 mod annotate;
 mod redact;
 mod route;
@@ -254,6 +254,7 @@ impl ProxyHttp for AmplitudeProxy {
 						)
 						.map_err(|e| *e)?
 				};
+
 				annotate::with_proxy_version(
 					&mut json,
 					&format!("{}-{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),

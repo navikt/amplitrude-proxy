@@ -25,6 +25,7 @@ strum = { version = "0.26.3", features = ["derive"] }
 tokio = { version = "1.40.0", features = ["full"] }
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter", "json"] }
+url = "2.5.2"
 
 [dev-dependencies]
 assert-json-diff = "2.0.2"
