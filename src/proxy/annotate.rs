@@ -86,7 +86,7 @@ pub fn with_urls(event: &mut Value, url: &Url, hostname: &str) {
 								);
 								inner_object
 									.insert("pagePath".into(), Value::String(url.path().into()));
-								inner_object.insert("hostname".into(), hostname.clone().into());
+								inner_object.insert("hostname".into(), hostname.into());
 							});
 					});
 				});

@@ -1,6 +1,5 @@
 use std::collections::HashSet;
 
-use http::Uri;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::Value;

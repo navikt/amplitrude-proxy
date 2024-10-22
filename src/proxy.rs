@@ -32,24 +32,12 @@ use crate::k8s::{
 use crate::metrics::{HANDLED_REQUESTS, INCOMING_REQUESTS, INVALID_PEER, PROXY_ERRORS};
 pub struct AmplitudeProxy {
 	pub conf: Config,
-	pub addr: std::net::SocketAddr,
-	pub sni: Option<String>,
 	pub bots: Bots,
 }
 
 impl AmplitudeProxy {
-	pub const fn new(
-		conf: Config,
-		addr: std::net::SocketAddr,
-		sni: Option<String>,
-		bots: Bots,
-	) -> Self {
-		Self {
-			conf,
-			addr,
-			sni,
-			bots,
-		}
+	pub const fn new(conf: Config, bots: Bots) -> Self {
+		Self { conf, bots }
 	}
 }
 
