@@ -70,6 +70,7 @@ dependencies = [
  "futures",
  "http 1.1.0",
  "isbot",
+ "itertools",
  "k8s-openapi",
  "kube",
  "lru",
@@ -1122,6 +1123,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f98d665d8689fd01bd1572c10fd58cf38a811f56c2d00b5ec5c0c50dc1eee956"
 dependencies = [
  "regex",
+]
+
+[[package]]
+name = "itertools"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
+dependencies = [
+ "either",
 ]
 
 [[package]]

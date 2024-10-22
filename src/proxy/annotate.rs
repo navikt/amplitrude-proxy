@@ -3,27 +3,37 @@ use url::Url;
 
 use crate::k8s;
 
+// This knows too much about the data structure, frfr.
 pub fn with_proxy_version(event: &mut Value, proxy_version: &str) {
 	match event {
+		Value::Object(obj) => {
+			if let Some(events) = obj.get_mut("events") {
+				if let Value::Array(events_array) = events {
+					for event_obj in events_array {
+						if let Value::Object(event_obj_map) = event_obj {
+							if let Some(event_properties) =
+								event_obj_map.get_mut("event_properties")
+							{
+								if event_properties.is_object() {
+									let inner_object = event_properties.as_object_mut().expect(
+                                        "Should be possible to get a mutable reference to the inner object",
+                                    );
+									inner_object.insert(
+										"proxyVersion".into(),
+										Value::String(proxy_version.to_string()),
+									);
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		Value::Array(arr) => {
 			for v in arr {
 				with_proxy_version(v, proxy_version);
 			}
 		},
-		Value::Object(obj) => {
-			for (key, v) in obj.iter_mut() {
-				if key == "event_properties" && v.is_object() {
-					let inner_object = v.as_object_mut().expect(
-						"Should be possible to get a mutable reference to the inner object",
-					);
-					inner_object.insert(
-						"proxyVersion".into(),
-						Value::String(proxy_version.to_string()),
-					);
-				}
-			}
-		},
-
 		_ => {
 			// No need to do anything for these types
 		},
@@ -96,13 +106,10 @@ pub fn with_url(event: &mut Value, event_url_obj: &Url) {
 	}
 }
 
-pub fn with_hostname(event: &mut Value, event_url_obj: &Url) {
+pub fn with_hostname(event: &mut Value, host: &str) {
 	if let Value::Object(obj) = event {
 		if let Some(Value::Object(event_properties)) = obj.get_mut("event_properties") {
-			event_properties.insert(
-				"hostname".into(),
-				Value::String(event_url_obj.host_str().unwrap_or("").to_string()),
-			);
+			event_properties.insert("hostname".into(), Value::String(host.into()));
 		}
 	}
 }
@@ -137,7 +144,7 @@ mod tests {
 
 	#[test]
 	fn test_with_hostname() {
-		let url = Url::parse("https://navno.com/foo").unwrap();
+		let url = "navno.com";
 		let mut event = json!({
 			"event_properties": {}
 		});
@@ -193,7 +200,7 @@ mod tests {
 
 	#[test]
 	fn test_annotate_with_proxy_version() {
-		let mut event = json!({
+		let mut event = json!({ "events": [{
 			"user_id": "12345",
 			"device_id": "device-98765",
 			"event_type": "button_click",
@@ -201,13 +208,13 @@ mod tests {
 				"button_name": "signup_button",
 				"color": "blue"
 			},
-			"session_id": 16789
-		});
+		"session_id": 16789}
+		]});
 
 		with_proxy_version(&mut event, "1.2.3");
 
-		let expected_event = json!({
-			"user_id": "12345",
+		let expected_event = json!({ "events": [
+			{"user_id": "12345",
 			"device_id": "device-98765",
 			"event_type": "button_click",
 			"event_properties": {
@@ -216,8 +223,8 @@ mod tests {
 				"proxyVersion": "1.2.3"
 
 			},
-			"session_id": 16789,
-		});
+			"session_id": 16789,}
+		]});
 
 		assert_eq!(event, expected_event);
 	}
