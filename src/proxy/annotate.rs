@@ -1,5 +1,5 @@
-use kube::core::object;
 use serde_json::Value;
+use url::Url;
 
 use crate::k8s;
 
@@ -81,10 +81,83 @@ pub fn with_key(v: &mut Value, amplitude_api_key: String) {
 	}
 }
 
+pub fn with_url(event: &mut Value, event_url_obj: &Url) {
+	if let Value::Object(obj) = event {
+		if let Some(Value::Object(event_properties)) = obj.get_mut("event_properties") {
+			event_properties.insert(
+				"url".into(),
+				Value::String(format!(
+					"{}{}",
+					event_url_obj.host_str().unwrap_or(""),
+					event_url_obj.path()
+				)),
+			);
+		}
+	}
+}
+
+pub fn with_hostname(event: &mut Value, event_url_obj: &Url) {
+	if let Value::Object(obj) = event {
+		if let Some(Value::Object(event_properties)) = obj.get_mut("event_properties") {
+			event_properties.insert(
+				"hostname".into(),
+				Value::String(event_url_obj.host_str().unwrap_or("").to_string()),
+			);
+		}
+	}
+}
+
+pub fn with_page_path(event: &mut Value, event_url_obj: &Url) {
+	if let Value::Object(obj) = event {
+		if let Some(Value::Object(event_properties)) = obj.get_mut("event_properties") {
+			event_properties.insert(
+				"pagePath".into(),
+				Value::String(event_url_obj.path().to_string()),
+			);
+		}
+	}
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
 	use serde_json::json;
+
+	#[test]
+	fn test_with_url() {
+		let url = Url::parse("https://navno.com/foo").unwrap();
+		let mut event = json!({
+			"event_properties": {}
+		});
+
+		with_url(&mut event, &url);
+
+		assert_eq!(event["event_properties"]["url"], "navno.com/foo");
+	}
+
+	#[test]
+	fn test_with_hostname() {
+		let url = Url::parse("https://navno.com/foo").unwrap();
+		let mut event = json!({
+			"event_properties": {}
+		});
+
+		with_hostname(&mut event, &url);
+
+		assert_eq!(event["event_properties"]["hostname"], "navno.com");
+	}
+
+	#[test]
+	fn test_with_page_path() {
+		let url = Url::parse("https://navno.com/foo").unwrap();
+		let mut event = json!({
+			"event_properties": {}
+		});
+
+		with_page_path(&mut event, &url);
+
+		assert_eq!(event["event_properties"]["pagePath"], "/foo");
+	}
 
 	#[test]
 	fn test_annotate_with_location() {
