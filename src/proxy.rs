@@ -63,7 +63,7 @@ pub struct Ctx {
 	request_body_buffer: Vec<u8>,
 	route: route::Route,
 	location: Option<Location>,
-	ingress: String,
+	host: String,
 	proxy_start: Option<time::Instant>,
 }
 
@@ -75,7 +75,7 @@ impl ProxyHttp for AmplitudeProxy {
 			request_body_buffer: Vec::new(),
 			route: route::Route::Unexpected(String::new()),
 			location: None,
-			ingress: String::new(),
+			host: String::new(),
 			proxy_start: None,
 		}
 	}
@@ -121,7 +121,7 @@ impl ProxyHttp for AmplitudeProxy {
 			},
 		);
 
-		ctx.ingress =
+		ctx.host =
 			(*origin.split("//").collect::<Vec<_>>().last().expect(
 				"HTTP requests are expected to contain an `origin` header w/scheme specified",
 			))
@@ -260,6 +260,7 @@ impl ProxyHttp for AmplitudeProxy {
 					&format!("{}-{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),
 				);
 
+				//				annotate::with_hostname(&mut json, ctx.host.as_ref());
 				redact::traverse_and_redact(&mut json);
 				info!("context: {:?}", get_context(&mut json));
 				info!("platform: {:?}", get_platform(&mut json));
@@ -302,7 +303,7 @@ impl ProxyHttp for AmplitudeProxy {
 			upstream_response.status,
 			upstream_response.get_reason_phrase(),
 			session.request_summary(),
-			ctx.ingress
+			ctx.host
 		);
 		Ok(())
 	}
@@ -420,7 +421,7 @@ fn annotate_with_api_key(conf: &Config, json: &mut Value, ctx: &Ctx) {
 		platform_str.and_then(|s| Url::parse(&s).ok())
 	};
 
-	// SUS!
+	// SUS
 	if platform.is_none() {
 		annotate::with_key(json, conf.amplitude_api_key_prod.clone());
 	}
@@ -428,11 +429,11 @@ fn annotate_with_api_key(conf: &Config, json: &mut Value, ctx: &Ctx) {
 	if let Some(app) = cache::get_app_info_with_longest_prefix(
 		&platform.map(|x| x.to_string()).unwrap_or("web".into()),
 	) {
-		annotate::with_app_info(json, &app, &ctx.ingress);
+		annotate::with_app_info(json, &app, &ctx.host);
 		annotate::with_key(json, conf.amplitude_api_key_prod.clone());
 	} else {
 		let env = categorize_other_environment(
-			ctx.ingress.clone(),
+			ctx.host.clone(),
 			&["dev.nav.no".into(), "localhost".into()],
 		);
 
