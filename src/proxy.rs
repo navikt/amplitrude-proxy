@@ -251,10 +251,6 @@ impl ProxyHttp for AmplitudeProxy {
 					&format!("{}-{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),
 				);
 
-				info!("context: {:?}", get_context(&mut json));
-				info!("platform: {:?}", get_platform(&mut json));
-				info!("source_name: {:?}", get_source_name(&mut json));
-
 				//				annotate::with_hostname(&mut json, ctx.host.as_ref());
 				redact::traverse_and_redact(&mut json);
 
