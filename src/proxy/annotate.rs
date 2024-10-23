@@ -129,7 +129,8 @@ pub fn with_location(value: &mut Value, city: &String, country: &String) {
 
 pub fn with_key(v: &mut Value, amplitude_api_key: String) {
 	if let Value::Object(obj) = v {
-		obj.insert("api_key".to_string(), Value::String(amplitude_api_key));
+		obj.entry("api_key".to_string())
+			.or_insert_with(|| Value::String(amplitude_api_key));
 	}
 }
 
@@ -137,6 +138,26 @@ pub fn with_key(v: &mut Value, amplitude_api_key: String) {
 mod tests {
 	use super::*;
 	use serde_json::json;
+
+	#[test]
+	fn test_with_key_adds_api_key() {
+		let amplitude_api_key = "test_api_key".to_string();
+		let mut value = json!({});
+
+		with_key(&mut value, amplitude_api_key.clone());
+
+		assert_eq!(value["api_key"], amplitude_api_key);
+	}
+
+	#[test]
+	fn test_with_key_does_not_override_existing_key() {
+		let amplitude_api_key = "new_api_key".to_string();
+		let mut value = json!({"api_key": "existing_api_key"});
+
+		with_key(&mut value, amplitude_api_key);
+
+		assert_eq!(value["api_key"], "existing_api_key");
+	}
 
 	#[test]
 	fn test_annotate_with_location() {
