@@ -18,3 +18,6 @@ pub static INVALID_PEER: Lazy<IntCounter> =
 
 pub static INGRESS_COUNT: Lazy<Gauge> =
 	Lazy::new(|| register_gauge!("ingress_count", "Number of ingresses in the cache").unwrap());
+
+pub static UPSTREAM_500: Lazy<IntCounter> =
+	Lazy::new(|| register_int_counter!("upstream_500_total", "invalid peer").unwrap());
