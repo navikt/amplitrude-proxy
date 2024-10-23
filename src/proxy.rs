@@ -289,7 +289,7 @@ impl ProxyHttp for AmplitudeProxy {
 		if upstream_response.status == 500 {
 			UPSTREAM_500.inc();
 		}
-		info!(
+		trace!(
 			"status: {}, reason {:?}, {} - Origin: {}",
 			upstream_response.status,
 			upstream_response.get_reason_phrase(),
