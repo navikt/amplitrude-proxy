@@ -1,3 +1,4 @@
+use http::{uri::InvalidUri, Uri};
 use serde_json::Value;
 use url::Url;
 
@@ -67,7 +68,7 @@ pub fn with_app_info(event: &mut Value, app_info: &k8s::cache::AppInfo, host: &S
 	}
 }
 
-pub fn with_urls(event: &mut Value, url: &Url, hostname: &str) {
+pub fn with_urls(event: &mut Value, url: &Result<Uri, InvalidUri>, hostname: &str) {
 	match event {
 		Value::Object(obj) => {
 			obj.get_mut("events")
@@ -79,14 +80,19 @@ pub fn with_urls(event: &mut Value, url: &Url, hostname: &str) {
 							.and_then(|event_obj_map| event_obj_map.get_mut("event_properties"))
 							.and_then(|event_properties| event_properties.as_object_mut())
 							.map(|inner_object| {
-								inner_object.insert("url".into(), Value::String(url.to_string()));
-								inner_object.insert(
-									"hostname".into(),
-									Value::String(url.host_str().unwrap_or("").into()),
-								);
-								inner_object
-									.insert("pagePath".into(), Value::String(url.path().into()));
-								inner_object.insert("hostname".into(), hostname.into());
+								if let Ok(uri) = url {
+									inner_object
+										.insert("url".into(), Value::String(uri.to_string()));
+									inner_object.insert(
+										"hostname".into(),
+										Value::String(uri.host().unwrap_or("").into()),
+									);
+									inner_object.insert(
+										"pagePath".into(),
+										Value::String(uri.path().into()),
+									);
+									inner_object.insert("hostname".into(), hostname.into());
+								}
 							});
 					});
 				});

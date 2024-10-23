@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use http::{uri::InvalidUri, Uri};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::Value;
@@ -107,7 +108,7 @@ fn print_query((key, value): &(Rule, Rule)) -> String {
 	format!("{}={}", key.pretty_print(), value.pretty_print())
 }
 
-pub fn redact_uri(old_uri: &Url) -> Url {
+pub fn redact_uri(old_uri: &Uri) -> Result<Uri, InvalidUri> {
 	let redacted_paths = itertools::join(
 		redact_paths(&old_uri.path().split('/').collect::<Vec<_>>())
 			.iter()
@@ -134,9 +135,7 @@ pub fn redact_uri(old_uri: &Url) -> Url {
 	} else {
 		String::new()
 	};
-	format!("{redacted_paths}{query_params}")
-		.parse::<Url>()
-		.unwrap()
+	format!("{redacted_paths}{query_params}").parse::<Uri>()
 }
 
 fn redact(s: &str) -> Rule {

@@ -408,13 +408,13 @@ fn parse_url_encoded(data: &str) -> Result<Value, pingora::Error> {
 }
 
 fn annotate_with_api_key(conf: &Config, json: &mut Value, ctx: &Ctx) {
-	let platform: Option<Url> = {
+	let platform: Option<Uri> = {
 		let platform_str = if is_using_new_sdk(json) {
 			get_source_name(json)
 		} else {
 			get_platform(json)
 		};
-		platform_str.and_then(|s| Url::parse(&s).ok())
+		platform_str.and_then(|s| s.parse::<Uri>().ok())
 	};
 
 	if let Some(url) = &platform {
