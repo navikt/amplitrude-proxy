@@ -251,9 +251,6 @@ impl ProxyHttp for AmplitudeProxy {
 
 				//				annotate::with_hostname(&mut json, ctx.host.as_ref());
 				redact::traverse_and_redact(&mut json);
-				info!("context: {:?}", get_context(&mut json));
-				info!("platform: {:?}", get_platform(&mut json));
-				info!("source_name: {:?}", get_source_name(&mut json));
 
 				annotate_with_api_key(&self.conf, &mut json, &ctx);
 				// This uses exactly "event_properties, which maybe only amplitude has"
@@ -315,6 +312,7 @@ impl ProxyHttp for AmplitudeProxy {
 			.expect("Needs correct transfer-encoding scheme header set");
 
 		match &ctx.route {
+			// TODO: These are hardcoded, it's mostly fine
 			route::Route::Amplitude(_) | route::Route::AmplitudeCollect(_) => {
 				upstream_request
 					.insert_header("Host", "api.eu.amplitude.com")
