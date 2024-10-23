@@ -299,8 +299,6 @@ impl ProxyHttp for AmplitudeProxy {
 		Ok(())
 	}
 
-	/// Redact path and query parameters of request
-	/// TODO: Also ensure that path fragments are redacted?
 	async fn upstream_request_filter(
 		&self,
 		_session: &mut Session,
@@ -416,10 +414,6 @@ fn annotate_with_api_key(conf: &Config, json: &mut Value, ctx: &Ctx) {
 	if let Some(url) = &platform {
 		let url = redact_uri(&url);
 		annotate::with_urls(json, &url, &ctx.host);
-	}
-	// SUS
-	if platform.is_none() {
-		annotate::with_key(json, conf.amplitude_api_key_prod.clone());
 	}
 
 	if let Some(app) = cache::get_app_info_with_longest_prefix(
