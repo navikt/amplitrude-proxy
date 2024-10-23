@@ -116,7 +116,7 @@ impl ProxyHttp for AmplitudeProxy {
 			(*origin.split("//").collect::<Vec<_>>().last().expect(
 				"HTTP requests are expected to contain an `origin` header w/scheme specified",
 			))
-			.to_string();
+			.to_owned();
 
 		let city = session
 			.downstream_session
@@ -254,7 +254,7 @@ impl ProxyHttp for AmplitudeProxy {
 				//				annotate::with_hostname(&mut json, ctx.host.as_ref());
 				redact::traverse_and_redact(&mut json);
 
-				annotate_with_api_key(&self.conf, &mut json, &ctx);
+				annotate_with_nav_extras(&self.conf, &mut json, &ctx);
 				// This uses exactly "event_properties, which maybe only amplitude has"
 				if let Some(loc) = &ctx.location {
 					annotate::with_location(&mut json, &loc.city, &loc.country);
@@ -401,7 +401,7 @@ fn parse_url_encoded(data: &str) -> Result<Value, pingora::Error> {
 	Ok(json!({ "events": events_data, "api-key": client }))
 }
 
-fn annotate_with_api_key(conf: &Config, json: &mut Value, ctx: &Ctx) {
+fn annotate_with_nav_extras(conf: &Config, json: &mut Value, ctx: &Ctx) {
 	let platform: Option<Uri> = {
 		let platform_str = if is_using_new_sdk(json) {
 			get_source_name(json)
@@ -417,16 +417,20 @@ fn annotate_with_api_key(conf: &Config, json: &mut Value, ctx: &Ctx) {
 	}
 
 	if let Some(app) = cache::get_app_info_with_longest_prefix(
-		&platform.map(|x| x.to_string()).unwrap_or("web".into()),
+		&platform
+			.map(|x| x.to_string())
+			.unwrap_or("web".into())
+			.as_str(),
 	) {
-		annotate::with_app_info(json, &app, &ctx.host);
+		// this is prod gcp because we can find the ingress url
+		annotate::with_app_info(json, &app, &ctx.host, "prod-gcp");
 		annotate::with_key(json, conf.amplitude_api_key_prod.clone());
 	} else {
 		let env = categorize_other_environment(
 			ctx.host.clone(),
 			&["dev.nav.no".into(), "localhost".into()],
 		);
-
+		// HACK!
 		match env.as_ref() {
 			"localhost" => {
 				annotate::with_key(json, conf.amplitude_api_key_local_systems.clone());

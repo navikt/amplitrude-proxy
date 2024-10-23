@@ -61,12 +61,12 @@ mod tests {
 
 	#[test]
 	fn test_insert_and_retrieve_from_cache() {
-		let key = "test-key".to_string();
+		let key = "test-key".to_owned();
 		let app_info = AppInfo {
-			app_name: "test-app".to_string(),
-			namespace: "test-namespace".to_string(),
-			ingress: "test-ingress".to_string(),
-			creation_timestamp: "2023-01-01T00:00:00Z".to_string(),
+			app_name: "test-app".to_owned(),
+			namespace: "test-namespace".to_owned(),
+			ingress: "test-ingress".to_owned(),
+			creation_timestamp: "2023-01-01T00:00:00Z".to_owned(),
 		};
 
 		insert_into_cache(key.clone(), app_info.clone());
@@ -83,14 +83,14 @@ mod tests {
 			"Retrieved AppInfo should match inserted value"
 		);
 
-		let prefix_key = "test-key-key-key".to_string();
+		let prefix_key = "test-key-key-key".to_owned();
 		let prefix_app_info = get_app_info_with_longest_prefix(&prefix_key).unwrap();
 		assert_eq!(
 			prefix_app_info, app_info,
 			"Prefix-based retrieval should match inserted AppInfo"
 		);
 
-		let empty_key = "".to_string();
+		let empty_key = "".to_owned();
 		let prefix_app_info = get_app_info_with_longest_prefix(&empty_key);
 		assert_eq!(
 			prefix_app_info, None,

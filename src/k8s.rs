@@ -46,6 +46,7 @@ pub async fn populate_cache() -> Result<(), Box<dyn std::error::Error>> {
 	Ok(())
 }
 
+/// This watches exactly the resources in prod-gcp, where this proxy is deployed. All other clusters get a -hack- treatment (why do you have user metrics in a dev environment?)
 pub async fn run_watcher() -> Result<(), Box<dyn std::error::Error>> {
 	info!("Started application watcher");
 	watcher(
@@ -79,19 +80,19 @@ fn application_to_app_info(application: &Application) -> Option<cache::AppInfo> 
 		.metadata
 		.name
 		.unwrap_or_else(|| "unknown app name".into());
-	let namespace = &app.metadata.namespace.as_ref()?.to_string();
+	let namespace = &app.metadata.namespace.as_ref()?.to_owned();
 
 	let creation_timestamp = &application
 		.metadata
 		.creation_timestamp
 		.as_ref()?
 		.0
-		.to_string();
+		.to_owned();
 
 	Some(cache::AppInfo {
-		app_name: app_name.to_string(),
+		app_name: app_name.to_owned(),
 		namespace: namespace.into(),
-		ingress: ingress_url.to_string(),
-		creation_timestamp: creation_timestamp.into(),
+		ingress: ingress_url.to_owned(),
+		creation_timestamp: creation_timestamp.to_string(),
 	})
 }

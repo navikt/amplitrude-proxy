@@ -35,7 +35,7 @@ pub fn with_proxy_version(event: &mut Value, proxy_version: &str) {
 	}
 }
 
-pub fn with_app_info(event: &mut Value, app_info: &k8s::cache::AppInfo, host: &String) {
+pub fn with_app_info(event: &mut Value, app_info: &k8s::cache::AppInfo, host: &str, context: &str) {
 	match event {
 		Value::Object(obj) => {
 			obj.get_mut("events")
@@ -52,14 +52,15 @@ pub fn with_app_info(event: &mut Value, app_info: &k8s::cache::AppInfo, host: &S
 								inner_object
 									.insert("ingress".into(), app_info.ingress.clone().into());
 								inner_object.insert("app".into(), app_info.app_name.clone().into());
-								inner_object.insert("hostname".into(), host.clone().into());
+								inner_object.insert("hostname".into(), host.into());
+								inner_object.insert("context".into(), context.into());
 							});
 					});
 				});
 		},
 		Value::Array(arr) => {
 			for v in arr {
-				with_app_info(v, app_info, host);
+				with_app_info(v, app_info, host, context);
 			}
 		},
 		_ => {
