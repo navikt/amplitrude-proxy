@@ -262,4 +262,18 @@ mod tests {
 		let result = redact(input).pretty_print();
 		assert_eq!(result, Rule::Original(input.to_string()).pretty_print());
 	}
+	#[test]
+	fn redact_segments_of_url_paths() {
+		let input_url = "/some/12345678901/fnr/tests?fnr=12345678901&foo=bar";
+		let expected_url = "/some/[redacted]/fnr/tests?fnr=[redacted]&foo=bar";
+		let uri: Uri = Uri::from_static(input_url);
+		assert_eq!(expected_url, redact_uri(&uri).unwrap());
+	}
+
+	#[test]
+	fn redact_fnr() {
+		let input_url = "Lekk - Kari Nordmann (fnr: 23031510135)";
+		let expected = "Lekk - Kari Nordmann (fnr: [redacted])";
+		assert_eq!(expected, redact(input_url).pretty_print());
+	}
 }
