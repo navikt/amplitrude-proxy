@@ -24,3 +24,6 @@ pub static UPSTREAM_500: Lazy<IntCounter> =
 
 pub static UPSTREAM_400: Lazy<IntCounter> =
 	Lazy::new(|| register_int_counter!("upstream_400_total", "client errors").unwrap());
+
+pub static UPSTREAM_200: Lazy<IntCounter> =
+	Lazy::new(|| register_int_counter!("upstream_200_total", "amplitude 200 ok").unwrap());

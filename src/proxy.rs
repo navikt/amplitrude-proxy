@@ -30,7 +30,8 @@ use crate::k8s::{
 	cache::{self, INITIALIZED},
 };
 use crate::metrics::{
-	HANDLED_REQUESTS, INCOMING_REQUESTS, INVALID_PEER, PROXY_ERRORS, UPSTREAM_400, UPSTREAM_500,
+	HANDLED_REQUESTS, INCOMING_REQUESTS, INVALID_PEER, PROXY_ERRORS, UPSTREAM_200, UPSTREAM_400,
+	UPSTREAM_500,
 };
 pub struct AmplitudeProxy {
 	pub conf: Config,
@@ -298,6 +299,10 @@ impl ProxyHttp for AmplitudeProxy {
 					ctx.host
 				);
 			},
+			200 => {
+				UPSTREAM_200.inc();
+			},
+
 			_ => {},
 		}
 		Ok(())
