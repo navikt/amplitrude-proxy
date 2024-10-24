@@ -129,8 +129,7 @@ pub fn with_location(value: &mut Value, city: &String, country: &String) {
 
 pub fn with_key(v: &mut Value, amplitude_api_key: String) {
 	if let Value::Object(obj) = v {
-		obj.entry("api_key".to_string())
-			.or_insert_with(|| Value::String(amplitude_api_key));
+		obj.insert("api_key".to_string(), Value::String(amplitude_api_key));
 	}
 }
 
