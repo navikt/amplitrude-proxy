@@ -3,6 +3,7 @@ A reverse.proxy in front of Amplitude. It redacts some data from
 requests and annotates requests with other data before sending it
 upstream. Responses from the upstream are left intact.
 
+#+BEGIN_SRC
   ┌─────────────┐
   │ Client      │
   │ (Downstream)│
@@ -15,6 +16,7 @@ upstream. Responses from the upstream are left intact.
   │ Amplitude   │
   │ (Upstream)  │
   └─────────────┘
+#+END_SRC
 
 This tries to be, morally, a reverse proxy and not a
 custom ingestion service. As such, we try to avoid a having (much
