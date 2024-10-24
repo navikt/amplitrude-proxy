@@ -330,7 +330,6 @@ impl ProxyHttp for AmplitudeProxy {
 					.insert_header("Host", "api.eu.amplitude.com")
 					.expect("Needs correct Host header");
 				upstream_request.set_uri(Uri::from_static("/2/httpapi"));
-				info!("{}", upstream_request.uri);
 			},
 			route::Route::Unexpected(_) => {},
 		}
