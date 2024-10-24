@@ -291,6 +291,9 @@ impl ProxyHttp for AmplitudeProxy {
 			500 => UPSTREAM_500.inc(),
 			400 => {
 				UPSTREAM_400.inc();
+			},
+			200 => {
+				UPSTREAM_200.inc();
 				info!(
 					"status: {}, reason {:?}, {} - Origin: {}",
 					upstream_response.status,
@@ -298,9 +301,6 @@ impl ProxyHttp for AmplitudeProxy {
 					session.request_summary(),
 					ctx.host
 				);
-			},
-			200 => {
-				UPSTREAM_200.inc();
 			},
 
 			_ => {},
