@@ -1,20 +1,44 @@
 * Ampritude-proxy
 
-A reverse proxy in front of Amplitude. It redacts some data and annotates requests with other data.
-This tries to be, morally, a reverse proxy and not a custom ingestion service.
-As such, we try to avoid a having knowledge about upstreams and downstreams.
+  ┌─────────────┐
+  │ Client      │
+  │ (Downstream)│
+  └────┬────────┘
+  ┌────┴────────┐
+  │ This proxy  │
+  │             │
+  └────┬────────┘
+  ┌────┴────────┐
+  │ Amplitude   │
+  │ (Upstream)  │
+  └─────────────┘
 
-** Implementation Notes
-There are several green threads by Tokio running different bits of the program. They should fail at the same time. Experimentation with `panic!` in one service confirms that they do. The above also holds true when tested with `loop { ... }`.
+A reverse.proxy in front of Amplitude. It redacts some data from
+requests and annotates requests with other data before sending it
+upstream. Responses from the upstream are left intact.
+
+This tries to be, morally, a reverse proxy and not a
+custom ingestion service. As such, we try to avoid a having (much
+specific) knowledge about upstreams and downstreams.
 
 ** Development
-Configured development environment requires:
-1. Nix (flake supported)
-2. Rust configured IDE of choice
+1. Nix supplies all the tooling. You can build with
+
+#+BEGIN_SRC sh
+  nix build
+#+END_SRC
+
+and get a development environment with
+#+BEGIN_SRC sh
+  nix develop
+#+END_SRC
 
 *** How to Run Locally
 
-1. Start an echo server of your choice, here we use socat for no particular reason:
+1. Start an echo server of your choice, here we use socat for no
+   particular reason:
+   - you could consider mccutchen/go-http-bin or similar.
+
    #+BEGIN_SRC sh
    socat -v -d -d tcp-l:1234,crlf,reuseaddr,fork system:"
    echo HTTP/1.1 200 OK;
@@ -28,15 +52,8 @@ Configured development environment requires:
 
 2. Start the program, you need to set amplitude envs first.
    #+BEGIN_SRC sh
-   cargo watch -qx 'run'  ;; or just `cargo run`
+   cargo run
    #+END_SRC
 
-3. Perform HTTP request towards it:
-   - Liveness probe:
-     #+BEGIN_SRC sh
-     curl -v localhost:6969/is_alive
-     #+END_SRC
-   - Proxied HTTP request:
-     #+BEGIN_SRC sh
-     curl -v -H'user-agent: nav-developer' 'localhost:6191/nav123456/abcdef123456/test654321/a1b2c3d4e5?regularstring=123456&anotherString=12345'
-     #+END_SRC
+3. You can now send requests to the service at 6191 and get forwarded
+   requests on the service you pointed the proxy at.
