@@ -1,4 +1,7 @@
 * Ampritude-proxy
+A reverse.proxy in front of Amplitude. It redacts some data from
+requests and annotates requests with other data before sending it
+upstream. Responses from the upstream are left intact.
 
   ┌─────────────┐
   │ Client      │
@@ -12,10 +15,6 @@
   │ Amplitude   │
   │ (Upstream)  │
   └─────────────┘
-
-A reverse.proxy in front of Amplitude. It redacts some data from
-requests and annotates requests with other data before sending it
-upstream. Responses from the upstream are left intact.
 
 This tries to be, morally, a reverse proxy and not a
 custom ingestion service. As such, we try to avoid a having (much
@@ -32,6 +31,8 @@ and get a development environment with
 #+BEGIN_SRC sh
   nix develop
 #+END_SRC
+
+If you do not want to use nix, the dependencies of this project beside the rust compiler includes at least cmake, perl and openssl
 
 *** How to Run Locally
 
