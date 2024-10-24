@@ -7,10 +7,10 @@ export const options = {
 };
 
 export default function () {
-    // This is against mchouten/httpbin , not socat (It was what i had running when i wrote this)
+    // This is against mcchouten/go-http-bin , not socat (It was what i had running when i wrote this)
   const url = 'http://localhost:6191/dump/request';
   const payload = JSON.stringify({
-    "api_key": "7883e1a1c733f2cfdf634b71f523ae67",
+    "api_key": "7883e1aasdfa3w13417",
     "events": [
       {
         "device_id": "PROXYPROXYPROXY",

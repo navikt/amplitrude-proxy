@@ -239,29 +239,3 @@ Content-Type: application/json; charset=utf-8
   ],
   "options": {}
 }
-
-
-* Prometheus :verb:
-
-GET http://localhost:9090/metrics
-Content-Type: application/json
-Accept: application/json
-
-* collect                                                              :verb:
-
-POST http://localhost:3000/api/collect
-Content-Type: application/json
-user-agent: carl
-Accept: application/json
-
-{
-    "type": "event",
-    "website": "4b335ffe-6f6f-40d0-a1cf-ef95f990d762",
-    "url": "nav.no",
-    "event_name": "button_click",
-    "event_data": {
-      "button_id": "submit_button"
-    }
-
-
-* is_alive
