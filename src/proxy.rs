@@ -30,7 +30,7 @@ use crate::k8s::{
 	cache::{self, INITIALIZED},
 };
 use crate::metrics::{
-	HANDLED_REQUESTS, INCOMING_REQUESTS, INVALID_PEER, PROXY_ERRORS, UPSTREAM_500,
+	HANDLED_REQUESTS, INCOMING_REQUESTS, INVALID_PEER, PROXY_ERRORS, UPSTREAM_400, UPSTREAM_500,
 };
 pub struct AmplitudeProxy {
 	pub conf: Config,
@@ -286,8 +286,10 @@ impl ProxyHttp for AmplitudeProxy {
 	where
 		Self::CTX: Send + Sync,
 	{
-		if upstream_response.status == 500 {
-			UPSTREAM_500.inc();
+		match upstream_response.status.as_u16() {
+			500 => UPSTREAM_500.inc(),
+			400 => UPSTREAM_400.inc(),
+			_ => {},
 		}
 		trace!(
 			"status: {}, reason {:?}, {} - Origin: {}",
