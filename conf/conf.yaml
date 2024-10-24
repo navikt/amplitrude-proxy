@@ -1,4 +1,4 @@
 ---
 version: 1
 threads: 8
-upstream_keepalive_pool_size: 16384
+upstream_keepalive_pool_size: 128
