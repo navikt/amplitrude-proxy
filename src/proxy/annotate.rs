@@ -127,9 +127,20 @@ pub fn with_location(value: &mut Value, city: &String, country: &String) {
 	}
 }
 
+// Sometimes there's a sentinel value in the api_key called "default"
 pub fn with_key(v: &mut Value, amplitude_api_key: String) {
 	if let Value::Object(obj) = v {
-		obj.insert("api_key".to_string(), Value::String(amplitude_api_key));
+		match obj.get("api_key") {
+			Some(Value::String(api_key)) if api_key == "default" => {
+				obj.insert("api_key".to_string(), Value::String(amplitude_api_key));
+			},
+			None => {
+				obj.insert("api_key".to_string(), Value::String(amplitude_api_key));
+			},
+			_ => {
+				// do nothing if there's an existing api_key that is not "default"
+			},
+		}
 	}
 }
 
@@ -138,6 +149,38 @@ mod tests {
 	use super::*;
 	use serde_json::json;
 
+	#[test]
+	fn test_with_key_replaces_default() {
+		let mut event = json!({
+			"api_key": "default",
+		});
+		with_key(&mut event, "new_api_key".to_string());
+		assert_eq!(event["api_key"], "new_api_key");
+	}
+
+	#[test]
+	fn test_with_key_inserts_if_absent() {
+		let mut event = json!({});
+		with_key(&mut event, "new_api_key".to_string());
+		assert_eq!(event["api_key"], "new_api_key");
+	}
+
+	#[test]
+	fn test_with_key_does_not_change_existing_key() {
+		let mut event = json!({
+			"api_key": "existing_key",
+		});
+		with_key(&mut event, "new_api_key".to_string());
+		assert_eq!(event["api_key"], "existing_key");
+	}
+
+	#[test]
+	fn test_with_key_does_nothing_for_non_object() {
+		let mut event = json!("not_an_object");
+		with_key(&mut event, "new_api_key".to_string());
+		// The value should remain unchanged
+		assert_eq!(event, "not_an_object");
+	}
 	#[test]
 	fn test_with_key_adds_api_key() {
 		let amplitude_api_key = "test_api_key".to_string();
