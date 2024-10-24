@@ -215,11 +215,11 @@ mod tests {
 				"device_model": "iPhone 12",
 				"event_time": 1678,
 				"session_id": 1678,
-				"insert_id": "[redacted]",  // Only this field is redacted
+				"insert_id": "123e4567-e89b-12d3-a456-426614174000",
 				"location_lat": 37.7749,
 				"location_lng": -122.4194,
 		//		"ip_address": "123.45.67.89"   // Ip Address gets deleted
-			});
+		});
 
 		// Apply the redaction function
 		traverse_and_redact(&mut json_data);
