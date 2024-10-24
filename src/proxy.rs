@@ -288,16 +288,18 @@ impl ProxyHttp for AmplitudeProxy {
 	{
 		match upstream_response.status.as_u16() {
 			500 => UPSTREAM_500.inc(),
-			400 => UPSTREAM_400.inc(),
+			400 => {
+				UPSTREAM_400.inc();
+				info!(
+					"status: {}, reason {:?}, {} - Origin: {}",
+					upstream_response.status,
+					upstream_response.get_reason_phrase(),
+					session.request_summary(),
+					ctx.host
+				);
+			},
 			_ => {},
 		}
-		trace!(
-			"status: {}, reason {:?}, {} - Origin: {}",
-			upstream_response.status,
-			upstream_response.get_reason_phrase(),
-			session.request_summary(),
-			ctx.host
-		);
 		Ok(())
 	}
 
