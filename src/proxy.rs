@@ -134,8 +134,6 @@ impl ProxyHttp for AmplitudeProxy {
 						.map_or(String::new(), std::borrow::ToOwned::to_owned)
 				},
 			);
-		let h = &session.req_header().headers;
-		dbg!("{#?}", h);
 
 		let country = session
 			.downstream_session
