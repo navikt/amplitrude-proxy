@@ -1,16 +1,16 @@
 * Ampritude-proxy
 A reverse.proxy in front of Amplitude. It redacts some data from
-requests and annotates requests with other data before sending it
+downstream requests and annotates downstream requests with other data before sending it
 upstream. Responses from the upstream are left intact.
 
 #+BEGIN_SRC
   ┌─────────────┐
-  │ Client      │
-  │ (Downstream)│
+  │ Client      │- Through Dekoratøren
+  │ (Downstream)│- Through the official sdks
   └────┬────────┘
   ┌────┴────────┐
-  │ This proxy  │
-  │             │
+  │ This proxy  │- Which redacts and annotates events
+  │             │  Talks to etcd in prod-gcp
   └────┬────────┘
   ┌────┴────────┐
   │ Amplitude   │

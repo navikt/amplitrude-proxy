@@ -266,15 +266,6 @@ impl ProxyHttp for AmplitudeProxy {
 
 				// Surely there is a correct-by-conctruction value type that can be turned into a string without fail
 				if let Ok(json_body) = serde_json::to_string(&json) {
-					match &ctx.route {
-						route::Route::Amplitude(s) => {
-							dbg!(s);
-							if s == "/arbeid/dagpenger/meldekort/" {
-								dbg!(&json_body);
-							}
-						},
-						_ => {},
-					}
 					*body = Some(Bytes::from(json_body));
 				} else {
 					// Technically, we do a bunch of mut Value, so there is
@@ -450,6 +441,10 @@ fn annotate_with_nav_extras(conf: &Config, json: &mut Value, ctx: &Ctx) {
 		} else {
 			get_platform(json)
 		};
+		if platform_str == Some("https://www.nav.no/arbeid/dagpenger/meldekort/".to_owned()) {
+			dbg!(&json);
+		}
+
 		platform_str.and_then(|s| s.parse::<Uri>().ok())
 	};
 
