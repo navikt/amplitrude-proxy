@@ -147,7 +147,7 @@ impl ProxyHttp for AmplitudeProxy {
 						.map_or(String::new(), std::borrow::ToOwned::to_owned)
 				},
 			);
-
+g
 		ctx.location = Some(Location { city, country });
 
 		let owned_parts = session.downstream_session.req_header().as_owned_parts();
@@ -266,7 +266,6 @@ impl ProxyHttp for AmplitudeProxy {
 
 				// Surely there is a correct-by-conctruction value type that can be turned into a string without fail
 				if let Ok(json_body) = serde_json::to_string(&json) {
-					dbg!(&json_body);
 					*body = Some(Bytes::from(json_body));
 				} else {
 					// Technically, we do a bunch of mut Value, so there is
@@ -298,8 +297,7 @@ impl ProxyHttp for AmplitudeProxy {
 			},
 			200 => {
 				UPSTREAM_200.inc();
-				dbg!(&upstream_response.headers);
-				info!(
+				trace!(
 					"status: {}, reason {:?}, {} - Origin: {}",
 					upstream_response.status,
 					upstream_response.get_reason_phrase(),
@@ -330,8 +328,6 @@ impl ProxyHttp for AmplitudeProxy {
 			b.clear();
 		}
 		if end_of_stream {
-			dbg!(String::from_utf8_lossy(&ctx.response_body_buffer));
-
 			*body = Some(Bytes::copy_from_slice(&ctx.response_body_buffer));
 		}
 		Ok(None)
