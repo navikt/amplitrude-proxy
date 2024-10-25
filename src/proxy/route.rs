@@ -1,5 +1,7 @@
 use std::fmt::{self, Display, Formatter};
 
+use crate::metrics::{COLLECT, COLLECT_AUTO};
+
 #[derive(Debug, PartialEq)]
 pub enum Route {
 	Amplitude(String),
@@ -15,8 +17,10 @@ impl Display for Route {
 
 pub fn match_route(path: String) -> Route {
 	if path.starts_with("/collect-auto") {
+		COLLECT_AUTO.inc();
 		Route::AmplitudeCollect(path)
 	} else if path.starts_with("/collect") {
+		COLLECT.inc();
 		Route::Amplitude(path)
 	} else {
 		Route::Unexpected(path)
