@@ -294,6 +294,7 @@ impl ProxyHttp for AmplitudeProxy {
 			},
 			200 => {
 				UPSTREAM_200.inc();
+				dbg!(&upstream_response.headers);
 				info!(
 					"status: {}, reason {:?}, {} - Origin: {}",
 					upstream_response.status,
