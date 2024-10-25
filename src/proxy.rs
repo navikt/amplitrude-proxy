@@ -266,6 +266,7 @@ impl ProxyHttp for AmplitudeProxy {
 
 				// Surely there is a correct-by-conctruction value type that can be turned into a string without fail
 				if let Ok(json_body) = serde_json::to_string(&json) {
+					dbg!(&json_body);
 					*body = Some(Bytes::from(json_body));
 				} else {
 					// Technically, we do a bunch of mut Value, so there is
