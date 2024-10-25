@@ -124,7 +124,7 @@ impl ProxyHttp for AmplitudeProxy {
 
 		let city = session
 			.downstream_session
-			.get_header("x-client-city")
+			.get_header("X-CLIENT-CITY")
 			.map_or_else(
 				|| {
 					String::from("Missing city header, this should not happen, the GCP loadbalancer adds these",)
@@ -137,7 +137,7 @@ impl ProxyHttp for AmplitudeProxy {
 
 		let country = session
 			.downstream_session
-			.get_header("x-client-region")
+			.get_header("X-CLIENT-REGION")
 			.map_or_else(
 				|| {
 					String::from("Missing country header, this should not happen the GCP loadbalancer adds these")

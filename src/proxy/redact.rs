@@ -73,6 +73,7 @@ pub fn traverse_and_redact(value: &mut Value) {
 			}
 
 			for (key, v) in obj.iter_mut() {
+				// these are some keys that specifically should not be redacted
 				if key == "api_key"
 					|| key == "device_id"
 					|| key == "website"
