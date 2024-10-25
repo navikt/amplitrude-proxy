@@ -147,7 +147,7 @@ impl ProxyHttp for AmplitudeProxy {
 						.map_or(String::new(), std::borrow::ToOwned::to_owned)
 				},
 			);
-g
+
 		ctx.location = Some(Location { city, country });
 
 		let owned_parts = session.downstream_session.req_header().as_owned_parts();
@@ -266,6 +266,15 @@ g
 
 				// Surely there is a correct-by-conctruction value type that can be turned into a string without fail
 				if let Ok(json_body) = serde_json::to_string(&json) {
+					match &ctx.route {
+						route::Route::Amplitude(s) => {
+							dbg!(s);
+							if s == "/arbeid/dagpenger/meldekort/" {
+								dbg!(&json_body);
+							}
+						},
+						_ => {},
+					}
 					*body = Some(Bytes::from(json_body));
 				} else {
 					// Technically, we do a bunch of mut Value, so there is

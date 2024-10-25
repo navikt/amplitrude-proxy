@@ -5,8 +5,8 @@ use crate::metrics::{COLLECT, COLLECT_AUTO};
 #[derive(Debug, PartialEq)]
 pub enum Route {
 	Amplitude(String),
-	AmplitudeCollect(String),
-	Unexpected(String), //Someone did a goof
+	AmplitudeCollect(String), // Should be deprecated shortly
+	Unexpected(String),       //Someone did a goof
 }
 
 impl Display for Route {
