@@ -55,6 +55,21 @@ pub fn get_app_info_with_longest_prefix(key: &str) -> Option<AppInfo> {
 	None
 }
 
+pub fn get_app_info(key: &str) -> Option<AppInfo> {
+	if let Some(longest_prefix) = PREFIX_TRIE
+		.lock()
+		.expect("Failed to lock trie")
+		.get(key.bytes())
+	{
+		return CACHE
+			.lock()
+			.expect("Failed to lock cache")
+			.get(&longest_prefix.clone())
+			.cloned();
+	}
+	None
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -69,7 +84,6 @@ mod tests {
 			creation_timestamp: "2023-01-01T00:00:00Z".to_owned(),
 		};
 
-		insert_into_cache(key.clone(), app_info.clone());
 		insert_into_cache(key.clone(), app_info.clone());
 
 		let retrieved_app_info = get_app_info_with_longest_prefix(&key.clone());
@@ -96,5 +110,28 @@ mod tests {
 			prefix_app_info, None,
 			"Prefix-based retrieval should match inserted AppInfo"
 		);
+
+		let dagpenger_key = "https://www.nav.no/arbeid/dagpenger/meldekort/".to_owned();
+
+		let dagpenger_app_info = AppInfo {
+			app_name: "dagpenger_app".to_owned(),
+			namespace: "dagpenger-namespace".to_owned(),
+			ingress: "https://www.nav.no/arbeid/dagpenger/meldekort/".to_owned(),
+			creation_timestamp: "2023-01-01T00:00:00Z".to_owned(),
+		};
+
+		insert_into_cache(dagpenger_key.clone(), dagpenger_app_info.clone());
+
+		let foo = PREFIX_TRIE
+			.lock()
+			.expect("Failed to lock trie")
+			.iter()
+			.for_each(|x| {
+				dbg!(x);
+			});
+
+		let dagpenger_window_location = "https://www.nav.no/arbeid/dagpenger/meldekort/";
+		let prefix_app_info = get_app_info_with_longest_prefix(&dagpenger_window_location).unwrap();
+		assert_eq!(prefix_app_info, dagpenger_app_info, "get meldekort");
 	}
 }

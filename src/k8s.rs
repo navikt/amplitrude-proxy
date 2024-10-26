@@ -5,7 +5,7 @@ use kube::{
 	runtime::{watcher, WatchStreamExt},
 	Client,
 };
-use tracing::{info, warn};
+use tracing::{error, info, warn};
 pub mod cache;
 use kube::CustomResource;
 use schemars::JsonSchema;
@@ -32,7 +32,9 @@ pub async fn populate_cache() -> Result<(), Box<dyn std::error::Error>> {
 	for app in app_list {
 		if let Some(app_info) = application_to_app_info(&app) {
 			warn!("added an application: {:?}", app_info);
-			cache::insert_into_cache(app_info.ingress.clone(), app_info);
+			app_info
+				.into_iter()
+				.for_each(|app| cache::insert_into_cache(app.ingress.clone(), app));
 		}
 	}
 	let cache = cache::CACHE.lock().expect("Unable to lock cache");
@@ -57,9 +59,10 @@ pub async fn run_watcher() -> Result<(), Box<dyn std::error::Error>> {
 	.default_backoff()
 	.try_for_each(move |app| async move {
 		if let Some(app_info) = application_to_app_info(&app) {
-			info!("New Application found, {}", app_info.app_name);
-			INGRESS_COUNT.inc();
-			cache::insert_into_cache(app_info.ingress.clone(), app_info);
+			app_info.into_iter().for_each(|app| {
+				INGRESS_COUNT.inc();
+				cache::insert_into_cache(app.ingress.clone(), app)
+			});
 		}
 		Ok(())
 	})
@@ -68,14 +71,15 @@ pub async fn run_watcher() -> Result<(), Box<dyn std::error::Error>> {
 	Ok(())
 }
 
-fn application_to_app_info(application: &Application) -> Option<cache::AppInfo> {
+fn application_to_app_info(application: &Application) -> Option<Vec<cache::AppInfo>> {
 	let app = application.clone();
 	let ingresses = &app.spec.ingresses?;
-	let Some(ingress_url) = ingresses.first() else {
+	if ingresses.is_empty() {
 		// If the app doesn't have ingress,
 		// we can't map it from an `Origin` HTTP request header to an Application anyways...
 		return None;
-	};
+	}
+
 	let app_name = &app
 		.metadata
 		.name
@@ -89,10 +93,15 @@ fn application_to_app_info(application: &Application) -> Option<cache::AppInfo> 
 		.0
 		.to_owned();
 
-	Some(cache::AppInfo {
-		app_name: app_name.to_owned(),
-		namespace: namespace.into(),
-		ingress: ingress_url.to_owned(),
-		creation_timestamp: creation_timestamp.to_string(),
-	})
+	let app_infos: Vec<cache::AppInfo> = ingresses
+		.iter()
+		.map(|ingress_url| cache::AppInfo {
+			app_name: app_name.to_owned(),
+			namespace: namespace.into(),
+			ingress: ingress_url.to_owned(),
+			creation_timestamp: creation_timestamp.to_string(),
+		})
+		.collect();
+
+	Some(app_infos)
 }

@@ -17,7 +17,6 @@ use std::str::FromStr;
 use std::sync::atomic::Ordering;
 use tokio::time;
 use tracing::{error, info, trace, warn};
-use url::Url;
 mod annotate;
 mod redact;
 mod route;
@@ -198,7 +197,6 @@ impl ProxyHttp for AmplitudeProxy {
 			interval: std::time::Duration::from_secs(5),
 			count: 3,
 		});
-
 		Ok(peer)
 	}
 
@@ -441,9 +439,6 @@ fn annotate_with_nav_extras(conf: &Config, json: &mut Value, ctx: &Ctx) {
 		} else {
 			get_platform(json)
 		};
-		if platform_str == Some("https://www.nav.no/arbeid/dagpenger/meldekort/".to_owned()) {
-			dbg!(&json);
-		}
 
 		platform_str.and_then(|s| s.parse::<Uri>().ok())
 	};
@@ -482,10 +477,6 @@ fn annotate_with_nav_extras(conf: &Config, json: &mut Value, ctx: &Ctx) {
 	}
 }
 
-fn normalize_url(url: &str) -> String {
-	url.replace("intern.dev.", "").replace(".dev", "")
-}
-
 fn get_platform(value: &Value) -> Option<String> {
 	value
 		.get("events")
@@ -494,20 +485,6 @@ fn get_platform(value: &Value) -> Option<String> {
 			events.iter().find_map(|event| {
 				event
 					.get("platform")
-					.and_then(|v| v.as_str())
-					.map(String::from)
-			})
-		})
-}
-
-fn get_context(value: &Value) -> Option<String> {
-	value
-		.get("events")
-		.and_then(|v| v.as_array())
-		.and_then(|events| {
-			events.iter().find_map(|event| {
-				event
-					.get("context")
 					.and_then(|v| v.as_str())
 					.map(String::from)
 			})
