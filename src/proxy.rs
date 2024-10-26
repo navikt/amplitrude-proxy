@@ -31,8 +31,8 @@ use crate::k8s::{
 	cache::{self, INITIALIZED},
 };
 use crate::metrics::{
-	HANDLED_REQUESTS, INCOMING_REQUESTS, INVALID_PEER, PROXY_ERRORS, UPSTREAM_200, UPSTREAM_400,
-	UPSTREAM_500,
+	HANDLED_REQUESTS, INCOMING_REQUESTS, INVALID_PEER, PROXY_ERRORS, REQUEST_DURATION,
+	UPSTREAM_200, UPSTREAM_400, UPSTREAM_500,
 };
 pub struct AmplitudeProxy {
 	pub conf: Config,
@@ -81,10 +81,9 @@ impl ProxyHttp for AmplitudeProxy {
 	where
 		Self::CTX: Send + Sync,
 	{
+		ctx.proxy_start = Some(std::time::Instant::now().into());
 		session.enable_retry_buffering();
-
 		INCOMING_REQUESTS.inc();
-		ctx.proxy_start = Some(time::Instant::now());
 		if !INITIALIZED.load(Ordering::Relaxed) {
 			// We only ever want to spawn this thread once. It reads all ingresses once and then sits
 			// around watching changes to ingresses
