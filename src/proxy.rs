@@ -360,10 +360,16 @@ impl ProxyHttp for AmplitudeProxy {
 		Ok(())
 	}
 
-	async fn logging(&self, session: &mut Session, e: Option<&Error>, _ctx: &mut Self::CTX)
+	async fn logging(&self, session: &mut Session, e: Option<&Error>, ctx: &mut Self::CTX)
 	where
 		Self::CTX: Send + Sync,
 	{
+		let elapsed = ctx
+			.proxy_start
+			.map(|instant| instant.elapsed().as_secs_f64())
+			.unwrap_or(Duration::ZERO.as_secs_f64());
+
+		REQUEST_DURATION.observe(elapsed);
 		let Some(err) = e else {
 			// happy path
 			HANDLED_REQUESTS.inc();

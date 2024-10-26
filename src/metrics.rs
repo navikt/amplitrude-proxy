@@ -1,6 +1,8 @@
 use once_cell::sync::Lazy;
 
-use prometheus::{register_gauge, Gauge, IntCounterVec};
+use prometheus::{
+	register_gauge, register_histogram, Gauge, Histogram, HistogramOpts, IntCounterVec,
+};
 use prometheus::{register_int_counter, register_int_counter_vec, IntCounter};
 
 pub static INCOMING_REQUESTS: Lazy<IntCounter> =
@@ -33,4 +35,12 @@ pub static COLLECT: Lazy<IntCounter> =
 
 pub static COLLECT_AUTO: Lazy<IntCounter> = Lazy::new(|| {
 	register_int_counter!("collect_auto_endpoint_total", "collect-auto endpoint").unwrap()
+});
+
+pub static REQUEST_DURATION: Lazy<Histogram> = Lazy::new(|| {
+	let opts = HistogramOpts::new("request_duration_seconds", "Request duration in seconds")
+		.buckets(vec![
+			0.00025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0,
+		]);
+	register_histogram!(opts).unwrap()
 });
