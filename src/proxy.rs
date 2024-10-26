@@ -434,15 +434,10 @@ fn parse_url_encoded(data: &str) -> Result<Value, pingora::Error> {
 }
 
 fn annotate_with_nav_extras(conf: &Config, json: &mut Value, ctx: &Ctx) {
-	let platform: Option<Uri> = {
-		let platform_str = if let Some(name) = get_source_name(json) {
-			Some(name)
-		} else {
-			get_platform(json)
-		};
+	let platform: Option<Uri> = get_source_name(json)
+		.or_else(|| get_platform(json))
+		.and_then(|s| s.parse::<Uri>().ok());
 
-		platform_str.and_then(|s| s.parse::<Uri>().ok())
-	};
 	if let Some(url) = &platform {
 		let url = redact_uri(&url);
 		annotate::with_urls(json, &url, &ctx.host);
