@@ -22,6 +22,7 @@ mod redact;
 mod route;
 use isbot::Bots;
 use std::time::Duration;
+use url::Url;
 
 use crate::config::Config;
 use crate::errors::{AmplitrudeProxyError, ErrorDescription};
@@ -501,7 +502,14 @@ fn get_source_name(value: &Value) -> Option<String> {
 					.get("ingestion_metadata")
 					.and_then(|metadata| metadata.get("source_name"))
 					.and_then(|v| v.as_str())
-					.map(String::from)
+					.and_then(|source_name| Url::parse(source_name).ok())
+					.map(|url| {
+						// This here is a poor man normalization.
+						let scheme = url.scheme();
+						let host = url.host_str().unwrap_or("");
+						let path = url.path();
+						format!("{}://{}{}", scheme, host, path)
+					})
 			})
 		})
 }

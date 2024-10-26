@@ -111,7 +111,7 @@ mod tests {
 			"Prefix-based retrieval should match inserted AppInfo"
 		);
 
-		let dagpenger_key = "https://www.nav.no/arbeid/dagpenger/meldekort/".to_owned();
+		let dagpenger_key = "https://www.nav.no/arbeid/dagpenger/meldekort".to_owned();
 
 		let dagpenger_app_info = AppInfo {
 			app_name: "dagpenger_app".to_owned(),
@@ -122,15 +122,7 @@ mod tests {
 
 		insert_into_cache(dagpenger_key.clone(), dagpenger_app_info.clone());
 
-		let foo = PREFIX_TRIE
-			.lock()
-			.expect("Failed to lock trie")
-			.iter()
-			.for_each(|x| {
-				dbg!(x);
-			});
-
-		let dagpenger_window_location = "https://www.nav.no/arbeid/dagpenger/meldekort/";
+		let dagpenger_window_location = "https://www.nav.no/arbeid/dagpenger/meldekort";
 		let prefix_app_info = get_app_info_with_longest_prefix(&dagpenger_window_location).unwrap();
 		assert_eq!(prefix_app_info, dagpenger_app_info, "get meldekort");
 	}
