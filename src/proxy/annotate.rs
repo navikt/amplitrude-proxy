@@ -2,7 +2,7 @@ use http::{uri::InvalidUri, Uri};
 use serde_json::Value;
 use url::Url;
 
-use crate::k8s;
+use crate::{k8s, metrics::DEFAULT_KEY};
 
 pub fn with_proxy_version(event: &mut Value, proxy_version: &str) {
 	match event {
@@ -132,6 +132,8 @@ pub fn with_key(v: &mut Value, amplitude_api_key: String) {
 	if let Value::Object(obj) = v {
 		match obj.get("api_key") {
 			Some(Value::String(api_key)) if api_key == "default" => {
+				// This could eventually be zero, then this check needs to go
+				DEFAULT_KEY.inc();
 				obj.insert("api_key".to_string(), Value::String(amplitude_api_key));
 			},
 			None => {

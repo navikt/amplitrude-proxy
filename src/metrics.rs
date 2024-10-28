@@ -15,6 +15,9 @@ pub static PROXY_ERRORS: Lazy<IntCounterVec> = Lazy::new(|| {
 	register_int_counter_vec!("proxy_errors_total", "proxys error", &["error"]).unwrap()
 });
 
+pub static DEFAULT_KEY: Lazy<IntCounter> =
+	Lazy::new(|| register_int_counter!("default_key_total", "default key").unwrap());
+
 pub static INVALID_PEER: Lazy<IntCounter> =
 	Lazy::new(|| register_int_counter!("invalid_peer_total", "invalid peer").unwrap());
 
