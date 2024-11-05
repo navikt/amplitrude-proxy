@@ -89,7 +89,7 @@ pub fn with_urls(event: &mut Value, url: &Result<Uri, InvalidUri>, hostname: &st
 										Value::String(uri.host().unwrap_or("").into()),
 									);
 									inner_object.insert(
-										"pagePath".into(),
+										"[Amplitude] Page Path".into(),
 										Value::String(uri.path().into()),
 									);
 									inner_object.insert("hostname".into(), hostname.into());
@@ -287,7 +287,7 @@ mod tests {
 				"event_properties": {
 					"url": url_str,
 					"hostname": hostname,
-					"pagePath": "/foo/bar",
+					"[Amplitude] Page Path": "/foo/bar",
 					"key": "value",
 				}
 			}]
