@@ -297,4 +297,35 @@ mod tests {
 
 		assert_eq!(event, expected_event);
 	}
+	#[test]
+	fn test_with_urls_doesnt_update_existing_url_properties() {
+		// this uses the same url as the old proxy test case
+		let url_str = "https://design.nav.no/foo/bar?query=param";
+		let url = Uri::from_static(url_str);
+
+		let hostname = "hostname";
+		let mut event = json!({
+			"events": [{
+				"event_properties": {
+					"key": "value",
+					"[Amplitude] Page Path": "/notouch",
+				}
+			}]
+		});
+
+		with_urls(&mut event, &Ok(url), hostname);
+
+		let expected_event = json!({
+			"events": [{
+				"event_properties": {
+					"url": url_str,
+					"hostname": hostname,
+					"[Amplitude] Page Path": "/notouch",
+					"key": "value",
+				}
+			}]
+		});
+
+		assert_eq!(event, expected_event);
+	}
 }
