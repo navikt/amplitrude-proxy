@@ -445,7 +445,7 @@ fn annotate_with_nav_extras(conf: &Config, json: &mut Value, ctx: &Ctx) {
 
 	if let Some(url) = &platform {
 		let url = redact_uri(&url);
-		annotate::with_urls(json, &url, &ctx.host);
+		annotate::with_urls(json, &ctx.host);
 	}
 
 	if let Some(app) = cache::get_app_info_with_longest_prefix(

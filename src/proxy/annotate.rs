@@ -1,6 +1,5 @@
-use http::{uri::InvalidUri, Uri};
+use http::Uri;
 use serde_json::Value;
-use url::Url;
 
 use crate::{k8s, metrics::DEFAULT_KEY};
 
@@ -69,40 +68,76 @@ pub fn with_app_info(event: &mut Value, app_info: &k8s::cache::AppInfo, host: &s
 	}
 }
 
-pub fn with_urls(event: &mut Value, url: &Result<Uri, InvalidUri>, hostname: &str) {
+pub fn with_urls(event: &mut Value, hostname: &str) {
 	match event {
 		Value::Object(obj) => {
 			obj.get_mut("events")
 				.and_then(|events| events.as_array_mut())
 				.map(|events_array| {
 					events_array.iter_mut().for_each(|event_obj| {
-						event_obj
-							.as_object_mut()
-							.and_then(|event_obj_map| event_obj_map.get_mut("event_properties"))
-							.and_then(|event_properties| event_properties.as_object_mut())
-							.map(|inner_object| {
-								if let Ok(uri) = url {
-									inner_object
-										.insert("url".into(), Value::String(uri.to_string()));
-									inner_object.insert(
-										"hostname".into(),
-										Value::String(uri.host().unwrap_or("").into()),
-									);
-									// Only set "[Amplitude] Page Path" if it doesn't already exist, the new client often sets this
-									inner_object
-										.entry("[Amplitude] Page Path".to_string())
-										.or_insert_with(|| Value::String(uri.path().to_string()));
+						let source_url = event_obj.as_object().and_then(|event_obj_map| {
+							event_obj_map
+								.get("ingestion_metadata")
+								.and_then(|metadata| metadata.get("source_name"))
+								.and_then(|source_name| source_name.as_str())
+								.map(|s| s.to_string()) // Clone the source URL string here
+						});
 
-									inner_object.insert("hostname".into(), hostname.into());
-								}
-							});
+						let platform = event_obj.as_object().and_then(|event_obj_map| {
+							event_obj_map
+								.get("platform")
+								.and_then(|metadata| metadata.get("source_name"))
+								.and_then(|source_name| source_name.as_str())
+								.map(|s| s.to_string()) // Clone the source URL string here
+						});
+
+						// Perform mutable operations in a separate scope
+						if let Some(uri) = source_url {
+							if let Some(inner_object) = event_obj
+								.as_object_mut()
+								.and_then(|event_obj_map| event_obj_map.get_mut("event_properties"))
+								.and_then(|event_properties| event_properties.as_object_mut())
+							{
+								// Only set "[Amplitude] Page Path" if it doesn't already exist
+								inner_object.insert("url".into(), Value::String(uri.to_string()));
+								inner_object.insert(
+									"hostname".into(),
+									Value::String(
+										uri.parse::<Uri>()
+											.ok()
+											.and_then(|u| u.host().map(|h| h.to_string()))
+											.unwrap_or_default()
+											.to_owned(),
+									),
+								);
+								// Only set "[Amplitude] Page Path" if it doesn't already exist, the new client often sets this
+
+								inner_object.insert("hostname".into(), hostname.into());
+
+								inner_object
+									.entry("[Amplitude] Page Path".to_string())
+									.or_insert_with(|| {
+										// Try parsing the URI's path, or fallback to `platform` or an empty string if all else fails
+										Value::String(
+											uri.to_owned()
+												.parse::<Uri>()
+												.ok()
+												.map(|parsed_uri| parsed_uri.path().to_string())
+												.or_else(|| platform.clone())
+												.unwrap_or_else(|| "".to_string()),
+										)
+									});
+
+								inner_object.insert("hostname".into(), hostname.into());
+							}
+						}
 					});
 				});
 		},
 
 		Value::Array(arr) => {
 			for v in arr {
-				with_urls(v, url, hostname);
+				with_urls(v, hostname);
 			}
 		},
 		_ => {
@@ -266,29 +301,26 @@ mod tests {
 
 		assert_eq!(event, expected_event);
 	}
-
 	#[test]
 	fn test_with_urls_updates_url_properties() {
-		// this uses the same url as the old proxy test case
-		let url_str = "https://design.nav.no/foo/bar?query=param";
-		let url = Uri::from_static(url_str);
-
 		let hostname = "hostname";
 		let mut event = json!({
 			"events": [{
+				"ingestion_metadata": {"source_name": "/foo/bar"},
 				"event_properties": {
 					"key": "value"
 				}
 			}]
 		});
 
-		with_urls(&mut event, &Ok(url), hostname);
+		with_urls(&mut event, hostname);
 
 		let expected_event = json!({
 			"events": [{
+				"ingestion_metadata": {"source_name": "/foo/bar"},
 				"event_properties": {
-					"url": url_str,
-					"hostname": hostname,
+					"url": "/foo/bar",
+					"hostname": hostname.to_owned(),
 					"[Amplitude] Page Path": "/foo/bar",
 					"key": "value",
 				}
@@ -297,29 +329,27 @@ mod tests {
 
 		assert_eq!(event, expected_event);
 	}
+
 	#[test]
 	fn test_with_urls_doesnt_update_existing_url_properties() {
-		// this uses the same url as the old proxy test case
 		let url_str = "https://design.nav.no/foo/bar?query=param";
-		let url = Uri::from_static(url_str);
 
 		let hostname = "hostname";
 		let mut event = json!({
 			"events": [{
 				"event_properties": {
 					"key": "value",
-					"[Amplitude] Page Path": "/notouch",
+					"[Amplitude] Page Path": "/notouch", // Existing property that should not be updated
 				}
 			}]
 		});
 
-		with_urls(&mut event, &Ok(url), hostname);
+		with_urls(&mut event, hostname);
 
+		// Expected JSON structure that preserves `[Amplitude] Page Path` as `/notouch`
 		let expected_event = json!({
 			"events": [{
 				"event_properties": {
-					"url": url_str,
-					"hostname": hostname,
 					"[Amplitude] Page Path": "/notouch",
 					"key": "value",
 				}
