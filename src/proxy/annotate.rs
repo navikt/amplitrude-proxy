@@ -88,16 +88,18 @@ pub fn with_urls(event: &mut Value, url: &Result<Uri, InvalidUri>, hostname: &st
 										"hostname".into(),
 										Value::String(uri.host().unwrap_or("").into()),
 									);
-									inner_object.insert(
-										"[Amplitude] Page Path".into(),
-										Value::String(uri.path().into()),
-									);
+									// Only set "[Amplitude] Page Path" if it doesn't already exist, the new client often sets this
+									inner_object
+										.entry("[Amplitude] Page Path".to_string())
+										.or_insert_with(|| Value::String(uri.path().to_string()));
+
 									inner_object.insert("hostname".into(), hostname.into());
 								}
 							});
 					});
 				});
 		},
+
 		Value::Array(arr) => {
 			for v in arr {
 				with_urls(v, url, hostname);
