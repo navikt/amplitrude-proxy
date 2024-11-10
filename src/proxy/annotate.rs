@@ -111,9 +111,6 @@ pub fn with_urls(event: &mut Value, hostname: &str) {
 									),
 								);
 								// Only set "[Amplitude] Page Path" if it doesn't already exist, the new client often sets this
-
-								inner_object.insert("hostname".into(), hostname.into());
-
 								inner_object
 									.entry("[Amplitude] Page Path".to_string())
 									.or_insert_with(|| {
@@ -127,8 +124,6 @@ pub fn with_urls(event: &mut Value, hostname: &str) {
 												.unwrap_or_else(|| "".to_string()),
 										)
 									});
-
-								inner_object.insert("hostname".into(), hostname.into());
 							}
 						}
 					});
