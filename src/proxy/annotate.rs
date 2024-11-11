@@ -98,7 +98,6 @@ pub fn with_urls(event: &mut Value, hostname: &str) {
 								.and_then(|event_obj_map| event_obj_map.get_mut("event_properties"))
 								.and_then(|event_properties| event_properties.as_object_mut())
 							{
-								inner_object.insert("hostname".into(), hostname.into());
 								inner_object.insert("url".into(), Value::String(uri.to_string()));
 								inner_object.insert(
 									"hostname".into(),
@@ -110,6 +109,7 @@ pub fn with_urls(event: &mut Value, hostname: &str) {
 											.to_owned(),
 									),
 								);
+								inner_object.insert("hostname".into(), hostname.into());
 
 								// Only set "[Amplitude] Page Path" if it doesn't already exist, the new client often sets this
 								inner_object
