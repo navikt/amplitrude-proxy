@@ -79,6 +79,7 @@ pub fn traverse_and_redact(value: &mut Value) {
 					|| key == "website"
 					|| key.contains("insert_id")
 					|| key == "client_upload_time"
+					|| key == "api-key"
 				{
 					continue;
 				}
