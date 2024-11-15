@@ -78,8 +78,8 @@ pub fn traverse_and_redact(value: &mut Value) {
 					|| key == "device_id"
 					|| key == "website"
 					|| key.contains("insert_id")
+					|| key.contains("api")
 					|| key == "client_upload_time"
-					|| key == "api-key"
 				{
 					continue;
 				}
