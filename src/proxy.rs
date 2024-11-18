@@ -437,14 +437,12 @@ fn parse_url_encoded(data: &str) -> Result<Value, pingora::Error> {
 
 	Ok(json!({ "events": events_data, "api-key": client }))
 }
-
 fn annotate_with_nav_extras(conf: &Config, json: &mut Value, ctx: &Ctx) {
 	let platform: Option<Uri> = get_source_name(json)
 		.or_else(|| get_platform(json))
 		.and_then(|s| s.parse::<Uri>().ok());
 
 	if let Some(url) = &platform {
-		let url = redact_uri(&url);
 		annotate::with_urls(json, &ctx.host);
 	}
 
@@ -454,9 +452,11 @@ fn annotate_with_nav_extras(conf: &Config, json: &mut Value, ctx: &Ctx) {
 			.unwrap_or("web".into())
 			.as_str(),
 	) {
-		// this is prod gcp because we can find the ingress url
 		annotate::with_app_info(json, &app, &ctx.host, "prod-gcp");
-		annotate::with_key(json, conf.amplitude_api_key_prod.clone());
+	}
+
+	if let Some(client) = json.get("client").and_then(Value::as_str) {
+		annotate::with_key(json, client.to_string());
 	} else {
 		let env = categorize_other_environment(
 			ctx.host.clone(),
