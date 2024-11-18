@@ -434,7 +434,7 @@ fn parse_url_encoded(data: &str) -> Result<Value, pingora::Error> {
 		serde_json::from_str::<Value>(e).unwrap_or(json!(null))
 	});
 
-	Ok(json!({ "events": events_data, "api-key": client }))
+	Ok(json!({ "events": events_data, "api_key": client }))
 }
 fn annotate_with_nav_extras(conf: &Config, json: &mut Value, ctx: &Ctx) {
 	let platform: Option<Uri> = get_source_name(json)
