@@ -421,7 +421,6 @@ impl ProxyHttp for AmplitudeProxy {
 		PROXY_ERRORS.with_label_values(&[(error.as_str())]).inc();
 	}
 }
-
 fn parse_url_encoded(data: &str) -> Result<Value, pingora::Error> {
 	let parsed: HashMap<String, String> = serde_urlencoded::from_str(data)
 		.explain_err(
@@ -575,7 +574,7 @@ mod tests {
 	fn test_parse_url_encoded() {
 		let input = "e=%5B%7B%22device_id%22%3A%22xPrSCZPag7CI1n6cHHrIPn%22%2C%22user_id%22%3Anull%2C%22timestamp%22%3A1728375957190%2C%22event_id%22%3A806%2C%22session_id%22%3A1728375927004%2C%22event_type%22%3A%22bes%C3%B8k%22%2C%22version_name%22%3Anull%2C%22platform%22%3A%22https%3A%2F%2Fwww.nav.no%2F%22%2C%22os_name%22%3A%22Chrome%22%2C%22os_version%22%3A%22129%22%2C%22device_model%22%3A%22Macintosh%22%2C%22device_manufacturer%22%3A%22Apple%22%2C%22language%22%3A%22en-GB%22%2C%22api_properties%22%3A%7B%7D%2C%22event_properties%22%3A%7B%22sidetittel%22%3A%22Forside%20privatperson%20-%20nav.no%22%2C%22innlogging%22%3Afalse%2C%22parametre%22%3A%7B%22context%22%3A%22privatperson%22%2C%22simple%22%3Afalse%2C%22simpleHeader%22%3Afalse%2C%22redirectToApp%22%3Afalse%2C%22level%22%3A%22Level3%22%2C%22language%22%3A%22nb%22%2C%22availableLanguages%22%3A%5B%22en%22%2C%22nb%22%5D%2C%22breadcrumbs%22%3A%5B%5D%2C%22utilsBackground%22%3A%22white%22%2C%22feedback%22%3Afalse%2C%22chatbot%22%3Atrue%2C%22chatbotVisible%22%3Afalse%2C%22shareScreen%22%3Atrue%2C%22maskHotjar%22%3Afalse%2C%22logoutWarning%22%3Atrue%2C%22BREADCRUMBS%22%3Afalse%7D%2C%22platform%22%3A%22https%3A%2F%2Fwww.nav.no%2F%22%2C%22origin%22%3A%22decorator-next%22%2C%22originVersion%22%3A%22unknown%22%2C%22viaDekoratoren%22%3Atrue%2C%22fromNext%22%3Atrue%7D%2C%22user_properties%22%3A%7B%7D%2C%22uuid%22%3A%2201056959-37fe-4021-94a4-6b08c6238913%22%2C%22library%22%3A%7B%22name%22%3A%22amplitude-js%22%2C%22version%22%3A%228.21.9%22%7D%2C%22sequence_number%22%3A862%2C%22groups%22%3A%7B%7D%2C%22group_properties%22%3A%7B%7D%2C%22user_agent%22%3A%22Mozilla%2F5.0%20%28Macintosh%3B%20Intel%20Mac%20OS%20X%2010_15_7%29%20AppleWebKit%2F537.36%20%28KHTML%2C%20like%20Gecko%29%20Chrome%2F129.0.0.0%20Safari%2F537.36%22%2C%22partner_id%22%3Anull%7D%5D";
 		let expected: Value = json!({
-				"api-key": null,
+				"api_key": null,
 			"events": [{
 				"device_id": "xPrSCZPag7CI1n6cHHrIPn",
 				"user_id": null,
