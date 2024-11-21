@@ -1,6 +1,9 @@
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "C-c C-r") verb-command-map))
 
+
+* 502 bad request
+
 * dump :verb:
 post http://localhost:6191/dump/request
 Content-Type: application/json; charset=utf-8
@@ -9,6 +12,7 @@ Content-Type: application/json; charset=utf-8
 
 post http://localhost:6191/dump/request
 Accept: application/json
+User-Agent: Carl
 Content-Type: application/json; charset=utf-8
 
 { "api_key": "7883e1a1c733f2cfdf634b71f523ae67",
@@ -239,3 +243,156 @@ Content-Type: application/json; charset=utf-8
   ],
   "options": {}
 }
+* MARION NEW :verb:
+post http://localhost:6191/dump/request
+Accept: application/json
+User-Agent: Carl
+Content-Type: application/json; charset=utf-8
+
+{
+  "api_key": "b0ea5ed50acc6bdf505e3f6cdf76b99d",
+  "events": [
+    {
+      "device_id": "10b3a960-90fa-4fb5-bebd-dadbb4032438",
+      "session_id": 1730655771616,
+      "time": 1730655791092,
+      "platform": "Web",
+      "language": "en-GB",
+      "ip": "$remote",
+      "insert_id": "1aa1c305-af38-4069-8ffd-f6473b0a0a70",
+      "ingestion_metadata": {
+        "source_name": "https://staging.ekstern.dev.nav.no/pensjon/kalkulator/start"
+      },
+      "event_type": "[Amplitude] Page Viewed",
+      "event_properties": {
+        "referrer": "https://testid.test.idporten.no/",
+        "referring_domain": "testid.test.idporten.no",
+        "[Amplitude] Page Domain": "staging.ekstern.dev.nav.no",
+        "[Amplitude] Page Location": "https://staging.ekstern.dev.nav.no/pensjon/kalkulator/start",
+        "[Amplitude] Page Path": "/pensjon/kalkulator/start",
+        "[Amplitude] Page Title": "Pensjonskalkulator - Pensjon",
+        "[Amplitude] Page URL": "https://staging.ekstern.dev.nav.no/pensjon/kalkulator/start",
+        "[Amplitude] Page Counter": 4
+      },
+      "event_id": 12,
+      "library": "amplitude-ts/2.11.8",
+      "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+    },
+    {
+      "device_id": "10b3a960-90fa-4fb5-bebd-dadbb4032438",
+      "session_id": 1730655771616,
+      "time": 1730655791092,
+      "platform": "Web",
+      "language": "en-GB",
+      "ip": "$remote",
+      "insert_id": "e7b231bb-545f-43e7-83d3-c07b8ac61e8c",
+      "ingestion_metadata": {
+        "source_name": "https://staging.ekstern.dev.nav.no/pensjon/kalkulator/start"
+      },
+      "event_type": "$identify",
+      "user_properties": {
+        "$set": {
+          "skjermbredde": 3840,
+          "skjermhoyde": 1600,
+          "vindusbredde": 351,
+          "vindushoyde": 1473
+        }
+      },
+      "event_id": 13,
+      "library": "amplitude-ts/2.11.8",
+      "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+    },
+    {
+      "device_id": "10b3a960-90fa-4fb5-bebd-dadbb4032438",
+      "session_id": 1730655771616,
+      "time": 1730655791092,
+      "platform": "Web",
+      "language": "en-GB",
+      "ip": "$remote",
+      "insert_id": "e5d6ba59-1d0e-4eba-a5b9-25f1a4b4abe6",
+      "ingestion_metadata": {
+        "source_name": "https://staging.ekstern.dev.nav.no/pensjon/kalkulator/start"
+      },
+      "event_type": "besøk",
+      "event_properties": {
+        "sidetittel": "Pensjonskalkulator - Pensjon",
+        "innlogging": "4",
+        "parametre": {
+          "context": "privatperson",
+          "simple": false,
+          "simpleHeader": false,
+          "redirectToApp": false,
+          "redirectToUrl": "https://www.nav.no/pensjon/kalkulator/start",
+          "level": "Level3",
+          "language": "nb",
+          "availableLanguages": [],
+          "breadcrumbs": [],
+          "utilsBackground": "transparent",
+          "feedback": false,
+          "chatbot": false,
+          "chatbotVisible": false,
+          "shareScreen": true,
+          "maskHotjar": true,
+          "logoutWarning": true,
+          "redirectOnUserChange": false,
+          "BREADCRUMBS": false
+        },
+        "platform": "https://staging.ekstern.dev.nav.no/pensjon/kalkulator/start",
+        "origin": "decorator-next",
+        "originVersion": "unknown",
+        "viaDekoratoren": true
+      },
+      "event_id": 14,
+      "library": "amplitude-ts/2.11.8",
+      "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+    }
+  ],
+  "options": {},
+  "client_upload_time": "2024-11-03T17:43:12.094Z"
+}
+
+
+* uventet feil - new                                                   :verb:
+post http://localhost:6191/dump/request
+Accept: application/json
+User-Agent: Carl
+Content-Type: application/json; charset=utf-8
+
+{"api_key":"b0ea5ed50acc6bdf505e3f6cdf76b99d","events":[{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972859594,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"39f5fbc3-5db4-4118-a327-e05ceb268898","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/start"},"event_type":"[Amplitude] Page Viewed","event_properties":{"referrer":"https://testid.test.idporten.no/","referring_domain":"testid.test.idporten.no","[Amplitude] Page Domain":"staging.ekstern.dev.nav.no","[Amplitude] Page Location":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp","[Amplitude] Page Path":"/pensjon/kalkulator/afp","[Amplitude] Page Title":"AFP – Pensjonskalkulator","[Amplitude] Page URL":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp","[Amplitude] Page Counter":5},"event_id":99,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"},{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972859596,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"05869619-46da-4e59-8b24-8c418d41a1fc","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/utenlandsopphold"},"event_type":"radiogroup valgt","event_properties":{"tekst":"Utenlandsopphold","valg":"nei","platform":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/utenlandsopphold","origin":"dekoratoren","originVersion":"unknown","viaDekoratoren":true},"event_id":100,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"},{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972859597,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"667d84d8-d993-4744-a3a7-e74586bf5aa3","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/utenlandsopphold"},"event_type":"button klikk","event_properties":{"tekst":"Neste fra /utenlandsopphold","platform":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/utenlandsopphold","origin":"dekoratoren","originVersion":"unknown","viaDekoratoren":true},"event_id":101,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"},{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972859601,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"558050dc-26ba-4cb6-bafe-867d72a68348","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp"},"event_type":"besøk","event_properties":{"sidetittel":"Utenlandsopphold – Pensjonskalkulator","innlogging":"4","parametre":{"context":"privatperson","simple":false,"simpleHeader":false,"redirectToApp":false,"redirectToUrl":"https://www.nav.no/pensjon/kalkulator/start","level":"Level3","language":"nb","availableLanguages":[],"breadcrumbs":[],"utilsBackground":"transparent","feedback":false,"chatbot":false,"chatbotVisible":false,"shareScreen":true,"maskHotjar":true,"logoutWarning":true,"redirectOnUserChange":false,"BREADCRUMBS":false},"platform":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp","origin":"nav-dekoratoren","originVersion":"unknown","viaDekoratoren":true},"event_id":102,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"},{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972860425,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"17a133e6-67a3-4c9a-b050-7e40725fd860","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/start"},"event_type":"[Amplitude] Page Viewed","event_properties":{"referrer":"https://testid.test.idporten.no/","referring_domain":"testid.test.idporten.no","[Amplitude] Page Domain":"staging.ekstern.dev.nav.no","[Amplitude] Page Location":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/uventet-feil","[Amplitude] Page Path":"/pensjon/kalkulator/uventet-feil","[Amplitude] Page Title":"AFP – Pensjonskalkulator","[Amplitude] Page URL":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/uventet-feil","[Amplitude] Page Counter":6},"event_id":103,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"},{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972860431,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"e3386582-922c-4685-85d5-58870d0abadd","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp"},"event_type":"info","event_properties":{"tekst":"ekskludert feilet","platform":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp","origin":"dekoratoren","originVersion":"unknown","viaDekoratoren":true},"event_id":104,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"},{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972860433,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"12909903-7886-4f98-85e6-1fafaa80aa20","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp"},"event_type":"info","event_properties":{"tekst":"hent uføregrad","data":"Ingen uføretrygd","platform":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp","origin":"dekoratoren","originVersion":"unknown","viaDekoratoren":true},"event_id":105,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"},{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972860436,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"526cf257-fd6d-4d81-b4be-5907b930c027","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/uventet-feil"},"event_type":"besøk","event_properties":{"sidetittel":"AFP – Pensjonskalkulator","innlogging":"4","parametre":{"context":"privatperson","simple":false,"simpleHeader":false,"redirectToApp":false,"redirectToUrl":"https://www.nav.no/pensjon/kalkulator/start","level":"Level3","language":"nb","availableLanguages":[],"breadcrumbs":[],"utilsBackground":"transparent","feedback":false,"chatbot":false,"chatbotVisible":false,"shareScreen":true,"maskHotjar":true,"logoutWarning":true,"redirectOnUserChange":false,"BREADCRUMBS":false},"platform":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/uventet-feil","origin":"nav-dekoratoren","originVersion":"unknown","viaDekoratoren":true},"event_id":106,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"}],"options":{},"client_upload_time":"2024-11-07T09:47:40.596Z","request_metadata":{"sdk":{"metrics":{"histogram":{}}}}}
+
+
+* Uventet feilD OLD                                                    :verb:
+post http://localhost:4242/collect
+Accept: application/json
+User-Agent: Carl
+Content-Type: application/json; charset=utf-8
+
+{"api_key":"b0ea5ed50acc6bdf505e3f6cdf76b99d","events":[{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972859594,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"39f5fbc3-5db4-4118-a327-e05ceb268898","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/start"},"event_type":"[Amplitude] Page Viewed","event_properties":{"referrer":"https://testid.test.idporten.no/","referring_domain":"testid.test.idporten.no","[Amplitude] Page Domain":"staging.ekstern.dev.nav.no","[Amplitude] Page Location":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp","[Amplitude] Page Path":"/pensjon/kalkulator/afp","[Amplitude] Page Title":"AFP – Pensjonskalkulator","[Amplitude] Page URL":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp","[Amplitude] Page Counter":5},"event_id":99,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"},{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972859596,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"05869619-46da-4e59-8b24-8c418d41a1fc","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/utenlandsopphold"},"event_type":"radiogroup valgt","event_properties":{"tekst":"Utenlandsopphold","valg":"nei","platform":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/utenlandsopphold","origin":"dekoratoren","originVersion":"unknown","viaDekoratoren":true},"event_id":100,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"},{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972859597,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"667d84d8-d993-4744-a3a7-e74586bf5aa3","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/utenlandsopphold"},"event_type":"button klikk","event_properties":{"tekst":"Neste fra /utenlandsopphold","platform":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/utenlandsopphold","origin":"dekoratoren","originVersion":"unknown","viaDekoratoren":true},"event_id":101,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"},{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972859601,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"558050dc-26ba-4cb6-bafe-867d72a68348","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp"},"event_type":"besøk","event_properties":{"sidetittel":"Utenlandsopphold – Pensjonskalkulator","innlogging":"4","parametre":{"context":"privatperson","simple":false,"simpleHeader":false,"redirectToApp":false,"redirectToUrl":"https://www.nav.no/pensjon/kalkulator/start","level":"Level3","language":"nb","availableLanguages":[],"breadcrumbs":[],"utilsBackground":"transparent","feedback":false,"chatbot":false,"chatbotVisible":false,"shareScreen":true,"maskHotjar":true,"logoutWarning":true,"redirectOnUserChange":false,"BREADCRUMBS":false},"platform":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp","origin":"nav-dekoratoren","originVersion":"unknown","viaDekoratoren":true},"event_id":102,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"},{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972860425,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"17a133e6-67a3-4c9a-b050-7e40725fd860","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/start"},"event_type":"[Amplitude] Page Viewed","event_properties":{"referrer":"https://testid.test.idporten.no/","referring_domain":"testid.test.idporten.no","[Amplitude] Page Domain":"staging.ekstern.dev.nav.no","[Amplitude] Page Location":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/uventet-feil","[Amplitude] Page Path":"/pensjon/kalkulator/uventet-feil","[Amplitude] Page Title":"AFP – Pensjonskalkulator","[Amplitude] Page URL":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/uventet-feil","[Amplitude] Page Counter":6},"event_id":103,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"},{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972860431,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"e3386582-922c-4685-85d5-58870d0abadd","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp"},"event_type":"info","event_properties":{"tekst":"ekskludert feilet","platform":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp","origin":"dekoratoren","originVersion":"unknown","viaDekoratoren":true},"event_id":104,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"},{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972860433,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"12909903-7886-4f98-85e6-1fafaa80aa20","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp"},"event_type":"info","event_properties":{"tekst":"hent uføregrad","data":"Ingen uføretrygd","platform":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/afp","origin":"dekoratoren","originVersion":"unknown","viaDekoratoren":true},"event_id":105,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"},{"device_id":"ad2e44e5-b170-487c-9afa-9c8797699aeb","session_id":1730970781639,"time":1730972860436,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"526cf257-fd6d-4d81-b4be-5907b930c027","ingestion_metadata":{"source_name":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/uventet-feil"},"event_type":"besøk","event_properties":{"sidetittel":"AFP – Pensjonskalkulator","innlogging":"4","parametre":{"context":"privatperson","simple":false,"simpleHeader":false,"redirectToApp":false,"redirectToUrl":"https://www.nav.no/pensjon/kalkulator/start","level":"Level3","language":"nb","availableLanguages":[],"breadcrumbs":[],"utilsBackground":"transparent","feedback":false,"chatbot":false,"chatbotVisible":false,"shareScreen":true,"maskHotjar":true,"logoutWarning":true,"redirectOnUserChange":false,"BREADCRUMBS":false},"platform":"https://staging.ekstern.dev.nav.no/pensjon/kalkulator/uventet-feil","origin":"nav-dekoratoren","originVersion":"unknown","viaDekoratoren":true},"event_id":106,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"}],"options":{},"client_upload_time":"2024-11-07T09:47:40.596Z","request_metadata":{"sdk":{"metrics":{"histogram":{}}}}}
+
+* Console :verb:
+POST http://localhost:6191/dump/request
+Accept: */*
+Accept-Language: en-GB,en-US;q=0.9,en;q=0.8
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+Cross-Origin-Resource-Policy: cross-origin
+Origin: https://console.nav.cloud.nais.io
+Priority: u=1, i
+Referer: https://console.nav.cloud.nais.io/
+Sec-Ch-Ua: "Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+Sec-Ch-Ua-Mobile: ?0
+Sec-Ch-Ua-Platform: "macOS"
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+
+checksum=56f2d27aadc3f9dbcfce3375832af019&client=16d1ee2fd894ca2562eeebb5095dbcf0&e=%5B%7B%22device_id%22%3A%22-_nN83ruou5v6XDt_nC_wS%22%2C%22user_id%22%3Anull%2C%22timestamp%22%3A1731959001525%2C%22event_id%22%3A896%2C%22session_id%22%3A1731958938630%2C%22event_type%22%3A%22pageview%22%2C%22version_name%22%3Anull%2C%22platform%22%3A%22Web%22%2C%22os_name%22%3A%22Chrome%22%2C%22os_version%22%3A%22131%22%2C%22device_model%22%3A%22Macintosh%22%2C%22device_manufacturer%22%3A%22Apple%22%2C%22language%22%3A%22en-GB%22%2C%22api_properties%22%3A%7B%22tracking_options%22%3A%7B%22city%22%3Afalse%2C%22ip_address%22%3Afalse%7D%7D%2C%22event_properties%22%3A%7B%22routeID%22%3A%22%2F%22%2C%22domain%22%3A%22console.nav.cloud.nais.io%22%2C%22service%22%3A%22nais-console%22%7D%2C%22user_properties%22%3A%7B%7D%2C%22uuid%22%3A%226cdf74c5-4267-4fac-8638-b52b678e8cb4%22%2C%22library%22%3A%7B%22name%22%3A%22amplitude-js%22%2C%22version%22%3A%228.21.9%22%7D%2C%22sequence_number%22%3A929%2C%22groups%22%3A%7B%7D%2C%22group_properties%22%3A%7B%7D%2C%22user_agent%22%3A%22Mozilla%2F5.0%20%28Macintosh%3B%20Intel%20Mac%20OS%20X%2010_15_7%29%20AppleWebKit%2F537.36%20%28KHTML%2C%20like%20Gecko%29%20Chrome%2F131.0.0.0%20Safari%2F537.36%22%2C%22partner_id%22%3Anull%7D%5D&upload_time=1731959001525&v=2
+
+* omstilling soknad :verb:
+post http://localhost:6191/dump/request
+Accept: application/json
+User-Agent: Carl
+Content-Type: application/json; charset=utf-8
+
+{"api_key":"10798841ebeba333b8ece6c046322d76","events":[{"device_id":"7109ee7b-38b7-48e6-bdf0-f91bce562882","session_id":1732186486325,"time":1732186506386,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"5a0d6391-c1a0-4d50-a97b-88f22409df52","ingestion_metadata":{"source_name":"https://www.nav.no/omstillingsstonad/soknad/"},"event_type":"[Amplitude] Page Viewed","event_properties":{"[Amplitude] Page Domain":"www.nav.no","[Amplitude] Page Location":"https://www.nav.no/omstillingsstonad/soknad/","[Amplitude] Page Path":"/omstillingsstonad/soknad/","[Amplitude] Page Title":"Søknad om omstillingsstønad","[Amplitude] Page URL":"https://www.nav.no/omstillingsstonad/soknad/","[Amplitude] Page Counter":3},"event_id":7,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"},{"device_id":"7109ee7b-38b7-48e6-bdf0-f91bce562882","session_id":1732186486325,"time":1732186506389,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"800b2e2d-ba3e-42ed-ba2c-6800d679774a","ingestion_metadata":{"source_name":"https://www.nav.no/omstillingsstonad/soknad/"},"event_type":"$identify","user_properties":{"$set":{"skjermbredde":3840,"skjermhoyde":1600,"vindusbredde":2561,"vindushoyde":193}},"event_id":8,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"},{"device_id":"7109ee7b-38b7-48e6-bdf0-f91bce562882","session_id":1732186486325,"time":1732186506390,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"6b752eb4-d02c-4a90-9f61-925cb881d055","ingestion_metadata":{"source_name":"https://www.nav.no/omstillingsstonad/soknad/"},"event_type":"besøk","event_properties":{"målgruppe":"privatperson","sidetittel":"Søknad om omstillingsstønad","innlogging":"4","parametre":{"context":"privatperson","simple":true,"simpleHeader":false,"redirectToApp":false,"level":"Level3","language":"nb","availableLanguages":[],"breadcrumbs":[],"utilsBackground":"transparent","feedback":false,"chatbot":true,"chatbotVisible":false,"shareScreen":true,"maskHotjar":true,"logoutWarning":true,"redirectOnUserChange":false,"BREADCRUMBS":false},"platform":"https://www.nav.no/omstillingsstonad/soknad/","origin":"nav-dekoratoren","originVersion":"unknown","viaDekoratoren":true},"event_id":9,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"},{"device_id":"7109ee7b-38b7-48e6-bdf0-f91bce562882","session_id":1732186486325,"time":1732186506640,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"e3ddb48a-3aad-449a-8489-7ade8c9f3a5e","ingestion_metadata":{"source_name":"https://www.nav.no/omstillingsstonad/soknad/"},"event_type":"[Amplitude] Page Viewed","event_properties":{"[Amplitude] Page Domain":"www.nav.no","[Amplitude] Page Location":"https://www.nav.no/omstillingsstonad/soknad","[Amplitude] Page Path":"/omstillingsstonad/soknad","[Amplitude] Page Title":"Søknad om omstillingsstønad","[Amplitude] Page URL":"https://www.nav.no/omstillingsstonad/soknad","[Amplitude] Page Counter":4},"event_id":10,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"},{"device_id":"7109ee7b-38b7-48e6-bdf0-f91bce562882","session_id":1732186486325,"time":1732186506642,"platform":"Web","language":"en-GB","ip":"$remote","insert_id":"6c806f40-cd02-4411-b717-6f81e7bfac15","ingestion_metadata":{"source_name":"https://www.nav.no/omstillingsstonad/soknad"},"event_type":"besøk","event_properties":{"målgruppe":"privatperson","sidetittel":"Søknad om omstillingsstønad","innlogging":"4","parametre":{"context":"privatperson","simple":true,"simpleHeader":false,"redirectToApp":false,"level":"Level3","language":"nb","availableLanguages":[],"breadcrumbs":[],"utilsBackground":"transparent","feedback":false,"chatbot":true,"chatbotVisible":false,"shareScreen":true,"maskHotjar":true,"logoutWarning":true,"redirectOnUserChange":false,"BREADCRUMBS":false},"platform":"https://www.nav.no/omstillingsstonad/soknad","origin":"nav-dekoratoren","originVersion":"unknown","viaDekoratoren":true},"event_id":11,"library":"amplitude-ts/2.11.8","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"}],"options":{},"client_upload_time":"2024-11-21T10:55:07.390Z"}
+
