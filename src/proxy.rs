@@ -437,43 +437,49 @@ fn parse_url_encoded(data: &str) -> Result<Value, pingora::Error> {
 	Ok(json!({ "events": events_data, "api_key": client }))
 }
 fn annotate_with_nav_extras(conf: &Config, json: &mut Value, ctx: &Ctx) {
-	let platform: Option<Uri> = get_source_name(json)
+	let platform = get_source_name(json)
 		.or_else(|| get_platform(json))
 		.and_then(|s| s.parse::<Uri>().ok());
 
-	if let Some(url) = &platform {
+	if platform.is_some() {
 		annotate::with_urls(json, &ctx.host);
 	}
 
-	if let Some(app) = cache::get_app_info_with_longest_prefix(
-		&platform
-			.map(|x| x.to_string())
-			.unwrap_or("web".into())
-			.as_str(),
-	) {
+	let platform_str = platform
+		.map(|x| x.to_string())
+		.unwrap_or_else(|| "web".to_string());
+
+	if let Some(app) = cache::get_app_info_with_longest_prefix(&platform_str) {
 		annotate::with_app_info(json, &app, &ctx.host, "prod-gcp");
 	}
 
-	if let Some(client) = json.get("client").and_then(Value::as_str) {
-		annotate::with_key(json, client.to_string());
-	} else {
-		let env = categorize_other_environment(
-			ctx.host.clone(),
-			&["dev.nav.no".into(), "localhost".into()],
-		);
-		// HACK!
-		match env.as_ref() {
-			"localhost" => {
-				annotate::with_key(json, conf.amplitude_api_key_local_systems.clone());
-			},
-			"dev" => {
-				annotate::with_key(json, conf.amplitude_api_key_dev.clone());
-			},
-			_ => {
-				annotate::with_key(json, conf.amplitude_api_key_other_systems.clone());
-			},
+	// The priority is, i think:
+	// 1. "client" field if it exists, this is new clients, {e: [], client:}..
+	// 2. "api_key" field if it exists and is not "default", this is collect-auto, sometimes
+	// 3. Fall back to environment-based key, this is the wtfbbq case
+	let key = if let Some(client) = json.get("client").and_then(Value::as_str) {
+		client.to_string()
+	} else if let Some(api_key) = json.get("api_key").and_then(Value::as_str) {
+		if api_key != "default" {
+			api_key.to_string()
+		} else {
+			let is_dev = ctx.host.contains("dev.nav.no") || ctx.host.contains("localhost");
+			if is_dev {
+				conf.amplitude_api_key_dev.clone()
+			} else {
+				conf.amplitude_api_key_prod.clone()
+			}
 		}
-	}
+	} else {
+		let is_dev = ctx.host.contains("dev.nav.no") || ctx.host.contains("localhost");
+		if is_dev {
+			conf.amplitude_api_key_dev.clone()
+		} else {
+			conf.amplitude_api_key_prod.clone()
+		}
+	};
+
+	annotate::with_key(json, key);
 }
 
 fn get_platform(value: &Value) -> Option<String> {
