@@ -47,10 +47,10 @@ let
         ];
       };
       resources = {
-        limits.memory = "1024Mi";
+        limits.memory = "2048Mi";
         requests = {
           cpu = "250m";
-          memory = "128Mi";
+          memory = "256Mi";
         };
       };
       env = lib.attrsToList rec {
