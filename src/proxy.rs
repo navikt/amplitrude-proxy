@@ -151,7 +151,6 @@ impl ProxyHttp for AmplitudeProxy {
 
 		let owned_parts = session.downstream_session.req_header().as_owned_parts();
 		let path = owned_parts.uri.path();
-		ctx.route = route::match_route(path.into());
 
 		let user_agent = session.downstream_session.get_header("USER-AGENT").cloned();
 		match user_agent {
