@@ -53,8 +53,9 @@
         imageTag = "v${cargoDetails.package.version}-${dockerTag}";
         imageName = "${pname}:${imageTag}";
         teamName = "team-researchops";
-        my-spec = import ./spec.nix { inherit lib teamName pname imageName; };
-
+        appSpec = import ./spec.nix { inherit lib teamName pname imageName; };
+        canarySpec =
+          import ./canary.nix { inherit lib teamName pname imageName; };
         # Compile (and cache) cargo dependencies _only_
         cargoArtifacts = craneLib.buildDepsOnly commonArgs;
 
@@ -148,9 +149,10 @@
             yamlContent = builtins.concatStringsSep ''
 
               ---
-            '' (map toJson my-spec);
+            '' (map toJson appSpec);
           in pkgs.writeText "spec.yaml" yamlContent;
 
+          canary = pkgs.writeText "canary.yaml" (builtins.toJSON canarySpec);
           docker = pkgs.dockerTools.buildImage {
             name = pname;
             tag = imageTag;
