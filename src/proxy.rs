@@ -82,6 +82,7 @@ impl ProxyHttp for AmplitudeProxy {
 		Self::CTX: Send + Sync,
 	{
 		ctx.proxy_start = Some(std::time::Instant::now().into());
+
 		session.enable_retry_buffering();
 		INCOMING_REQUESTS.inc();
 		if !INITIALIZED.load(Ordering::Relaxed) {
@@ -153,6 +154,8 @@ impl ProxyHttp for AmplitudeProxy {
 		let path = owned_parts.uri.path();
 
 		let user_agent = session.downstream_session.get_header("USER-AGENT").cloned();
+		trace!("request_filter");
+
 		match user_agent {
 			Some(ua) => match ua.to_str() {
 				Ok(ua) => {
@@ -196,6 +199,7 @@ impl ProxyHttp for AmplitudeProxy {
 			interval: std::time::Duration::from_secs(5),
 			count: 3,
 		});
+		trace!("peer {}", peer);
 		Ok(peer)
 	}
 
@@ -275,6 +279,7 @@ impl ProxyHttp for AmplitudeProxy {
 				}
 			}
 		}
+		trace!("request_body_filter");
 		Ok(())
 	}
 
@@ -327,6 +332,7 @@ impl ProxyHttp for AmplitudeProxy {
 		if end_of_stream {
 			*body = Some(Bytes::copy_from_slice(&ctx.response_body_buffer));
 		}
+		trace!("response body filter");
 		Ok(None)
 	}
 	async fn upstream_request_filter(
