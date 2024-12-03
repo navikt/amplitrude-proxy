@@ -33,11 +33,12 @@ pub static UPSTREAM_400: Lazy<IntCounter> =
 pub static UPSTREAM_200: Lazy<IntCounter> =
 	Lazy::new(|| register_int_counter!("upstream_200_total", "amplitude 200 ok").unwrap());
 
-pub static COLLECT: Lazy<IntCounter> =
-	Lazy::new(|| register_int_counter!("collect_endpoint_total", "collect endpoint").unwrap());
+pub static HTTP2: Lazy<IntCounter> = Lazy::new(|| {
+	register_int_counter!("downstream_http2_total", "downstream http 2 connections").unwrap()
+});
 
-pub static COLLECT_AUTO: Lazy<IntCounter> = Lazy::new(|| {
-	register_int_counter!("collect_auto_endpoint_total", "collect-auto endpoint").unwrap()
+pub static HTTP1: Lazy<IntCounter> = Lazy::new(|| {
+	register_int_counter!("downstream_http1_total", "downstream http 1 connections ").unwrap()
 });
 
 pub static REQUEST_DURATION: Lazy<Histogram> = Lazy::new(|| {
