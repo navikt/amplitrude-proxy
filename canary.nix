@@ -1,6 +1,6 @@
 { lib, teamName, pname, imageName, ... }:
 let
-  name = pname;
+  name = pname + "-canary";
   namespace = teamName;
   canary = {
     apiVersion = "nais.io/v1alpha1";
@@ -11,16 +11,12 @@ let
       annotations = {
         "nginx.ingress.kubernetes.io/canary" = "true";
         "nginx.ingress.kubernetes.io/canary-weight" = "1";
-        # V These can be tuned, for sure
-        "config.linkerd.io/proxy-cpu-limit" = "4"; # Ridic number
-        "config.linkerd.io/proxy-cpu-request" = "1000m";
-        "config.linkerd.io/proxy-memory-request" = "256Mi";
-        "config.linkerd.io/proxy-memory-limit" = "512Mi";
       };
     };
     spec = {
       ingresses = [ "https://amplitude.nav.no" ];
-      image = "europe-north1-docker.pkg.dev/nais-management-233d/UPDATEME!?";
+      image =
+        "europe-north1-docker.pkg.dev/nais-management-233d/team-researchops/amplitrude-proxy:v0.1.0-472-a0ece8e";
       port = 6191;
       liveness = {
         failureThreshold = 10;
@@ -36,8 +32,8 @@ let
         port = "9090";
       };
       replicas = {
-        min = 4;
-        max = 6;
+        min = 1;
+        max = 2;
         cpuThresholdPercentage = 50;
         scalingStrategy.cpu.thresholdPercentage = 50;
       };
@@ -48,7 +44,7 @@ let
         ];
       };
       resources = {
-        limits.memory = "1024Mi";
+        limits.memory = "126";
         requests = {
           cpu = "250m";
           memory = "128Mi";
