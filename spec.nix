@@ -1,4 +1,10 @@
-{ lib, teamName, pname, imageName, ... }:
+{
+  lib,
+  teamName,
+  pname,
+  imageName,
+  ...
+}:
 let
   name = pname;
   namespace = teamName;
@@ -18,8 +24,7 @@ let
     };
     spec = {
       ingresses = [ "https://amplitude.nav.no" ];
-      image =
-        "europe-north1-docker.pkg.dev/nais-management-233d/${teamName}/${imageName}";
+      image = "europe-north1-docker.pkg.dev/nais-management-233d/${teamName}/${imageName}";
       port = 6191;
       liveness = {
         failureThreshold = 10;
@@ -59,7 +64,7 @@ let
         AMPLITUDE_PORT = "443";
         AMPLITUDE_SNI = AMPLITUDE_HOST;
       };
-      envFrom = [{ secret = "amplitude-keys"; }];
+      envFrom = [ { secret = "amplitude-keys"; } ];
     };
   };
 
@@ -71,10 +76,14 @@ let
       inherit namespace;
     };
     spec = {
-      egress = [{ to = [{ ipBlock.cidr = "0.0.0.0/0"; }]; }];
+      egress = [ { to = [ { ipBlock.cidr = "0.0.0.0/0"; } ]; } ];
       podSelector.matchLabels.app = pname;
       policyTypes = [ "Egress" ];
     };
   };
 
-in [ naisApp allowAllEgress ]
+in
+[
+  naisApp
+  allowAllEgress
+]

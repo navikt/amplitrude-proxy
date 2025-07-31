@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use http::{uri::InvalidUri, Uri};
+use http::{Uri, uri::InvalidUri};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::Value;

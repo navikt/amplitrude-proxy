@@ -1,6 +1,5 @@
 {
-  description =
-    "A Nix-flake based development interface for NAV's Statusplattform's K8s operator";
+  description = "A Nix-flake based development interface for NAV's Statusplattform's K8s operator";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -12,6 +11,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Rust 3rd party tooling
     advisory-db = {
       url = "github:rustsec/advisory-db";
@@ -19,8 +23,10 @@
     };
   };
 
-  outputs = { self, ... }@inputs:
-    inputs.flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    { self, ... }@inputs:
+    inputs.flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = import inputs.nixpkgs {
           inherit system;
@@ -28,8 +34,7 @@
         };
         inherit (pkgs) lib;
 
-        craneLib = (inputs.crane.mkLib pkgs).overrideToolchain
-          (p: p.rust-bin.stable.latest.default);
+        craneLib = (inputs.crane.mkLib pkgs).overrideToolchain (p: p.rust-bin.stable.latest.default);
 
         # Common vars
         cargoDetails = lib.importTOML ./Cargo.toml;
@@ -39,8 +44,14 @@
           inherit pname src;
 
           buildInputs = with pkgs; [ openssl ];
-          nativeBuildInputs = with pkgs;
-            [ pkg-config cmake perl ] ++ lib.optionals stdenv.isDarwin [
+          nativeBuildInputs =
+            with pkgs;
+            [
+              pkg-config
+              cmake
+              perl
+            ]
+            ++ lib.optionals stdenv.isDarwin [
               darwin.apple_sdk.frameworks.Security
               darwin.apple_sdk.frameworks.SystemConfiguration
             ];
@@ -49,35 +60,44 @@
         imageTag = "v${cargoDetails.package.version}-${dockerTag}";
         imageName = "${pname}:${imageTag}";
         teamName = "team-researchops";
-        my-spec = import ./spec.nix { inherit lib teamName pname imageName; };
+        my-spec = import ./spec.nix {
+          inherit
+            lib
+            teamName
+            pname
+            imageName
+            ;
+        };
 
         # Compile (and cache) cargo dependencies _only_
         cargoArtifacts = craneLib.buildDepsOnly commonArgs;
 
-        cargo-sbom = craneLib.mkCargoDerivation (commonArgs // {
-          # Require the caller to specify cargoArtifacts we can use
-          inherit cargoArtifacts;
+        cargo-sbom = craneLib.mkCargoDerivation (
+          commonArgs
+          // {
+            # Require the caller to specify cargoArtifacts we can use
+            inherit cargoArtifacts;
 
-          # A suffix name used by the derivation, useful for logging
-          pnameSuffix = "-sbom";
+            # A suffix name used by the derivation, useful for logging
+            pnameSuffix = "-sbom";
 
-          # Set the cargo command we will use and pass through the flags
-          installPhase = "mv bom.json $out";
-          buildPhaseCargoCommand =
-            "cargo cyclonedx -f json --all --override-filename bom";
-          nativeBuildInputs = (commonArgs.nativeBuildInputs or [ ])
-            ++ [ pkgs.cargo-cyclonedx ];
-        });
+            # Set the cargo command we will use and pass through the flags
+            installPhase = "mv bom.json $out";
+            buildPhaseCargoCommand = "cargo cyclonedx -f json --all --override-filename bom";
+            nativeBuildInputs = (commonArgs.nativeBuildInputs or [ ]) ++ [ pkgs.cargo-cyclonedx ];
+          }
+        );
 
-        dockerTag = if lib.hasAttr "rev" self then
-          "${builtins.toString self.revCount}-${self.shortRev}"
-        else
-          "gitDirty";
+        dockerTag =
+          if lib.hasAttr "rev" self then
+            "${builtins.toString self.revCount}-${self.shortRev}"
+          else
+            "gitDirty";
 
         # Compile workspace code (including 3rd party dependencies)
-        cargo-package =
-          craneLib.buildPackage (commonArgs // { inherit cargoArtifacts; });
-      in {
+        cargo-package = craneLib.buildPackage (commonArgs // { inherit cargoArtifacts; });
+      in
+      {
         checks = {
           inherit cargo-package cargo-sbom;
           # Run clippy (and deny all warnings) on the crate source,
@@ -86,12 +106,14 @@
           # Note that this is done as a separate derivation so that
           # we can block the CI if there are issues here, but not
           # prevent downstream consumers from building our crate by itself.
-          cargo-clippy = craneLib.cargoClippy (commonArgs // {
-            inherit cargoArtifacts;
-            cargoClippyExtraArgs = lib.concatStringsSep " " [ ];
-          });
-          cargo-doc =
-            craneLib.cargoDoc (commonArgs // { inherit cargoArtifacts; });
+          cargo-clippy = craneLib.cargoClippy (
+            commonArgs
+            // {
+              inherit cargoArtifacts;
+              cargoClippyExtraArgs = lib.concatStringsSep " " [ ];
+            }
+          );
+          cargo-doc = craneLib.cargoDoc (commonArgs // { inherit cargoArtifacts; });
           cargo-fmt = craneLib.cargoFmt { inherit src; };
           cargo-audit = craneLib.cargoAudit {
             inherit (inputs) advisory-db;
@@ -99,7 +121,8 @@
           };
         };
         devShells.default = craneLib.devShell {
-          packages = with pkgs;
+          packages =
+            with pkgs;
             [
               cmake
               socat
@@ -118,7 +141,8 @@
               # Editor stuffs
               lldb
               rust-analyzer
-            ] ++ lib.optionals stdenv.isDarwin [
+            ]
+            ++ lib.optionals stdenv.isDarwin [
               darwin.apple_sdk.frameworks.Security
               darwin.apple_sdk.frameworks.SystemConfiguration
             ];
@@ -139,13 +163,15 @@
               cp  ${src} $out/conf/conf.yaml
             '';
           };
-          spec = let
-            toJson = attrSet: builtins.toJSON attrSet;
-            yamlContent = builtins.concatStringsSep ''
+          spec =
+            let
+              toJson = attrSet: builtins.toJSON attrSet;
+              yamlContent = builtins.concatStringsSep ''
 
-              ---
-            '' (map toJson my-spec);
-          in pkgs.writeText "spec.yaml" yamlContent;
+                ---
+              '' (map toJson my-spec);
+            in
+            pkgs.writeText "spec.yaml" yamlContent;
 
           docker = pkgs.dockerTools.buildImage {
             name = pname;
@@ -160,6 +186,10 @@
         };
 
         # Now `nix fmt` works!
-        formatter = pkgs.alejandra;
-      });
+        formatter = inputs.treefmt-nix.lib.mkWrapper pkgs {
+          programs.nixfmt.enable = true;
+          programs.rustfmt.enable = true;
+        };
+      }
+    );
 }

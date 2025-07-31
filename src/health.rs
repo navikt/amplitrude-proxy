@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 use pingora::{
+	Result,
 	prelude::HttpPeer,
 	proxy::{ProxyHttp, Session},
-	Result,
 };
 use tracing::trace;
 

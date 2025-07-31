@@ -1,9 +1,9 @@
 use crate::metrics::INGRESS_COUNT;
 use futures::TryStreamExt;
 use kube::{
-	api::{Api, ListParams},
-	runtime::{watcher, WatchStreamExt},
 	Client,
+	api::{Api, ListParams},
+	runtime::{WatchStreamExt, watcher},
 };
 use tracing::{error, info, warn};
 pub mod cache;

@@ -1,9 +1,9 @@
 use once_cell::sync::Lazy;
 
 use prometheus::{
-	register_gauge, register_histogram, Gauge, Histogram, HistogramOpts, IntCounterVec,
+	Gauge, Histogram, HistogramOpts, IntCounterVec, register_gauge, register_histogram,
 };
-use prometheus::{register_int_counter, register_int_counter_vec, IntCounter};
+use prometheus::{IntCounter, register_int_counter, register_int_counter_vec};
 
 pub static INCOMING_REQUESTS: Lazy<IntCounter> =
 	Lazy::new(|| register_int_counter!("incoming_requests_total", "incoming requests").unwrap());

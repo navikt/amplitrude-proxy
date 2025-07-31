@@ -1,16 +1,16 @@
 use async_trait::async_trait;
 use bytes::Bytes;
 use http::Uri;
-use pingora::http::ResponseHeader;
 use pingora::ErrorType as ErrType;
+use pingora::http::ResponseHeader;
 use pingora::{
+	Error, OrErr, Result,
 	http::RequestHeader,
 	prelude::HttpPeer,
 	proxy::{ProxyHttp, Session},
-	Error, OrErr, Result,
 };
 use redact::redact_uri;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::collections::HashMap;
 use std::net::ToSocketAddrs;
 use std::str::FromStr;
@@ -126,7 +126,9 @@ impl ProxyHttp for AmplitudeProxy {
 			.get_header("X-CLIENT-CITY")
 			.map_or_else(
 				|| {
-					String::from("Missing city header, this should not happen, the GCP loadbalancer adds these",)
+					String::from(
+						"Missing city header, this should not happen, the GCP loadbalancer adds these",
+					)
 				},
 				|x| {
 					x.to_str()
@@ -139,7 +141,9 @@ impl ProxyHttp for AmplitudeProxy {
 			.get_header("X-CLIENT-REGION")
 			.map_or_else(
 				|| {
-					String::from("Missing country header, this should not happen the GCP loadbalancer adds these")
+					String::from(
+						"Missing country header, this should not happen the GCP loadbalancer adds these",
+					)
 				},
 				|x| {
 					x.to_str()
@@ -542,7 +546,7 @@ fn is_using_new_sdk(event: &Value) -> bool {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use serde_json::{json, Value};
+	use serde_json::{Value, json};
 
 	#[test]
 	fn test_categorize_environment_dev() {
