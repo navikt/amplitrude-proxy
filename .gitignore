@@ -2,3 +2,4 @@
 /.direnv/
 .idea
 /result
+.env*
