@@ -55,21 +55,6 @@ pub fn get_app_info_with_longest_prefix(key: &str) -> Option<AppInfo> {
 	None
 }
 
-pub fn get_app_info(key: &str) -> Option<AppInfo> {
-	if let Some(longest_prefix) = PREFIX_TRIE
-		.lock()
-		.expect("Failed to lock trie")
-		.get(key.bytes())
-	{
-		return CACHE
-			.lock()
-			.expect("Failed to lock cache")
-			.get(&longest_prefix.clone())
-			.cloned();
-	}
-	None
-}
-
 #[cfg(test)]
 mod tests {
 	use super::*;

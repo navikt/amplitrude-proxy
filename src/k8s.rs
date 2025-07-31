@@ -5,7 +5,7 @@ use kube::{
 	api::{Api, ListParams},
 	runtime::{WatchStreamExt, watcher},
 };
-use tracing::{error, info, warn};
+use tracing::{info, warn};
 pub mod cache;
 use kube::CustomResource;
 use schemars::JsonSchema;

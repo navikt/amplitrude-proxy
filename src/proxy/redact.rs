@@ -1,18 +1,17 @@
 use std::collections::HashSet;
 use std::sync::LazyLock;
 
-use http::{Uri, uri::InvalidUri};
 use regex::Regex;
 use serde_json::Value;
 
 static KEEP_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {
-	Regex::new(r"((nav|test)[0-9]{6})").expect("Hard-coded regex expression should be valid")
+	Regex::new(r"((nav|test)[0-9]{6})").expect("Hard-coded expression should be valid regex")
 });
 static HEX_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {
-	Regex::new(r"[a-f0-9\-]{6,}").expect("Hard-coded regex expression should be valid")
+	Regex::new(r"[a-f0-9\-]{6,}").expect("Hard-coded expression should be valid regex")
 });
 static ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {
-	Regex::new(r"\d[oiA-Z0-9]{8,}").expect("Hard-coded regex expression should be valid")
+	Regex::new(r"\d[oiA-Z0-9]{8,}").expect("Hard-coded expression should be valid regex")
 });
 
 #[derive(Debug, PartialEq, Eq)]
@@ -38,6 +37,8 @@ impl Rule {
 			Self::Redact => redacted.to_string(),
 		}
 	}
+
+	#[cfg(test)]
 	pub(crate) fn new(s: &str) -> Self {
 		redact(s)
 	}
@@ -100,50 +101,6 @@ pub fn traverse_and_redact(value: &mut Value) {
 	}
 }
 
-fn redact_paths(ps: &[&str]) -> Vec<Rule> {
-	ps.iter().map(|p: &&str| Rule::new(p)).collect()
-}
-
-fn redact_queries(ss: &[(&str, &str)]) -> Vec<(Rule, Rule)> {
-	ss.iter()
-		.map(|q| (Rule::new(q.0), Rule::new(q.1)))
-		.collect()
-}
-
-fn print_query((key, value): &(Rule, Rule)) -> String {
-	format!("{}={}", key.pretty_print(), value.pretty_print())
-}
-
-pub fn redact_uri(old_uri: &Uri) -> Result<Uri, InvalidUri> {
-	let redacted_paths = itertools::join(
-		redact_paths(&old_uri.path().split('/').collect::<Vec<_>>())
-			.iter()
-			.map(|p| p.pretty_print()),
-		"/",
-	);
-
-	let redacted_queries = itertools::join(
-		redact_queries(
-			&old_uri
-				.query()
-				.unwrap_or("")
-				.split('&')
-				.filter_map(|q| q.split_once('='))
-				.collect::<Vec<_>>(),
-		)
-		.iter()
-		.map(print_query),
-		"&",
-	);
-
-	let query_params = if old_uri.query().is_some_and(|q| !q.is_empty()) {
-		format!("?{redacted_queries}")
-	} else {
-		String::new()
-	};
-	format!("{redacted_paths}{query_params}").parse::<Uri>()
-}
-
 fn redact(s: &str) -> Rule {
 	if KEEP_REGEX.is_match(s) {
 		Rule::Keep(s.to_string())
@@ -158,7 +115,52 @@ fn redact(s: &str) -> Rule {
 mod tests {
 	use super::*;
 
+	use http::{Uri, uri::InvalidUri};
 	use serde_json::json;
+
+	fn redact_paths(ps: &[&str]) -> Vec<Rule> {
+		ps.iter().map(|p: &&str| Rule::new(p)).collect()
+	}
+
+	fn redact_queries(ss: &[(&str, &str)]) -> Vec<(Rule, Rule)> {
+		ss.iter()
+			.map(|q| (Rule::new(q.0), Rule::new(q.1)))
+			.collect()
+	}
+
+	fn print_query((key, value): &(Rule, Rule)) -> String {
+		format!("{}={}", key.pretty_print(), value.pretty_print())
+	}
+
+	pub fn redact_uri(old_uri: &Uri) -> Result<Uri, InvalidUri> {
+		let redacted_paths = itertools::join(
+			redact_paths(&old_uri.path().split('/').collect::<Vec<_>>())
+				.iter()
+				.map(|p| p.pretty_print()),
+			"/",
+		);
+
+		let redacted_queries = itertools::join(
+			redact_queries(
+				&old_uri
+					.query()
+					.unwrap_or("")
+					.split('&')
+					.filter_map(|q| q.split_once('='))
+					.collect::<Vec<_>>(),
+			)
+			.iter()
+			.map(print_query),
+			"&",
+		);
+
+		let query_params = if old_uri.query().is_some_and(|q| !q.is_empty()) {
+			format!("?{redacted_queries}")
+		} else {
+			String::new()
+		};
+		format!("{redacted_paths}{query_params}").parse::<Uri>()
+	}
 
 	#[test]
 	fn test_redact_uuid_in_amplitude_event() {

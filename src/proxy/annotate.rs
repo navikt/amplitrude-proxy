@@ -1,27 +1,42 @@
 use http::Uri;
-use serde_json::Value;
+use serde_json::{Map, Value};
 
 use crate::{k8s, metrics::DEFAULT_KEY};
+
+type JsonMap = Map<String, Value>;
+
+fn modify_event(obj: &mut JsonMap, event_closure: impl Fn(&mut JsonMap)) {
+	let Some(events_array) = obj
+		.get_mut("events")
+		.and_then(|events| events.as_array_mut())
+	else {
+		return;
+	};
+
+	for event_obj in events_array.iter_mut() {
+		let Some(event): Option<&mut JsonMap> =
+			event_obj.as_object_mut().and_then(|event_obj_map| {
+				event_obj_map
+					.get_mut("event_properties")
+					.and_then(|event_properties| event_properties.as_object_mut())
+			})
+		else {
+			continue;
+		};
+
+		event_closure(event);
+	}
+}
 
 pub fn with_proxy_version(event: &mut Value, proxy_version: &str) {
 	match event {
 		Value::Object(obj) => {
-			obj.get_mut("events")
-				.and_then(|events| events.as_array_mut())
-				.map(|events_array| {
-					events_array.iter_mut().for_each(|event_obj| {
-						event_obj
-							.as_object_mut()
-							.and_then(|event_obj_map| event_obj_map.get_mut("event_properties"))
-							.and_then(|event_properties| event_properties.as_object_mut())
-							.map(|inner_object| {
-								inner_object.insert(
-									"proxyVersion".into(),
-									Value::String(proxy_version.to_string()),
-								);
-							});
-					});
-				});
+			modify_event(obj, |e| {
+				e.insert(
+					"proxyVersion".to_string(),
+					Value::String(proxy_version.to_string()),
+				);
+			});
 		},
 		Value::Array(arr) => {
 			for v in arr {
@@ -37,25 +52,13 @@ pub fn with_proxy_version(event: &mut Value, proxy_version: &str) {
 pub fn with_app_info(event: &mut Value, app_info: &k8s::cache::AppInfo, host: &str, context: &str) {
 	match event {
 		Value::Object(obj) => {
-			obj.get_mut("events")
-				.and_then(|events| events.as_array_mut())
-				.map(|events_array| {
-					events_array.iter_mut().for_each(|event_obj| {
-						event_obj
-							.as_object_mut()
-							.and_then(|event_obj_map| event_obj_map.get_mut("event_properties"))
-							.and_then(|event_properties| event_properties.as_object_mut())
-							.map(|inner_object| {
-								inner_object
-									.insert("team".into(), app_info.namespace.clone().into());
-								inner_object
-									.insert("ingress".into(), app_info.ingress.clone().into());
-								inner_object.insert("app".into(), app_info.app_name.clone().into());
-								inner_object.insert("hostname".into(), host.into());
-								inner_object.insert("context".into(), context.into());
-							});
-					});
-				});
+			modify_event(obj, |event| {
+				event.insert("team".into(), app_info.namespace.clone().into());
+				event.insert("ingress".into(), app_info.ingress.clone().into());
+				event.insert("app".into(), app_info.app_name.clone().into());
+				event.insert("hostname".into(), host.into());
+				event.insert("context".into(), context.into());
+			});
 		},
 		Value::Array(arr) => {
 			for v in arr {
@@ -71,64 +74,65 @@ pub fn with_app_info(event: &mut Value, app_info: &k8s::cache::AppInfo, host: &s
 pub fn with_urls(event: &mut Value, hostname: &str) {
 	match event {
 		Value::Object(obj) => {
-			obj.get_mut("events")
+			if let Some(events_array) = obj
+				.get_mut("events")
 				.and_then(|events| events.as_array_mut())
-				.map(|events_array| {
-					events_array.iter_mut().for_each(|event_obj| {
-						let source_url = event_obj.as_object().and_then(|event_obj_map| {
-							event_obj_map
-								.get("ingestion_metadata")
-								.and_then(|metadata| metadata.get("source_name"))
-								.and_then(|source_name| source_name.as_str())
-								.map(|s| s.to_string()) // Clone the source URL string here
-						});
-
-						let platform = event_obj.as_object().and_then(|event_obj_map| {
-							event_obj_map
-								.get("platform")
-								.and_then(|metadata| metadata.get("source_name"))
-								.and_then(|source_name| source_name.as_str())
-								.map(|s| s.to_string()) // Clone the source URL string here
-						});
-
-						// Perform mutable operations in a separate scope
-						if let Some(uri) = source_url {
-							if let Some(inner_object) = event_obj
-								.as_object_mut()
-								.and_then(|event_obj_map| event_obj_map.get_mut("event_properties"))
-								.and_then(|event_properties| event_properties.as_object_mut())
-							{
-								inner_object.insert("url".into(), Value::String(uri.to_string()));
-								inner_object.insert(
-									"hostname".into(),
-									Value::String(
-										uri.parse::<Uri>()
-											.ok()
-											.and_then(|u| u.host().map(|h| h.to_string()))
-											.unwrap_or_default()
-											.to_owned(),
-									),
-								);
-								inner_object.insert("hostname".into(), hostname.into());
-
-								// Only set "[Amplitude] Page Path" if it doesn't already exist, the new client often sets this
-								inner_object
-									.entry("[Amplitude] Page Path".to_string())
-									.or_insert_with(|| {
-										// Try parsing the URI's path, or fallback to `platform` or an empty string if all else fails
-										Value::String(
-											uri.to_owned()
-												.parse::<Uri>()
-												.ok()
-												.map(|parsed_uri| parsed_uri.path().to_string())
-												.or_else(|| platform.clone())
-												.unwrap_or_else(|| "".to_string()),
-										)
-									});
-							}
-						}
+			{
+				events_array.iter_mut().for_each(|event_obj| {
+					let source_url = event_obj.as_object().and_then(|event_obj_map| {
+						event_obj_map
+							.get("ingestion_metadata")
+							.and_then(|metadata| metadata.get("source_name"))
+							.and_then(|source_name| source_name.as_str())
+							.map(|s| s.to_string()) // Clone the source URL string here
 					});
+
+					let platform = event_obj.as_object().and_then(|event_obj_map| {
+						event_obj_map
+							.get("platform")
+							.and_then(|metadata| metadata.get("source_name"))
+							.and_then(|source_name| source_name.as_str())
+							.map(|s| s.to_string()) // Clone the source URL string here
+					});
+
+					// Perform mutable operations in a separate scope
+					if let Some(uri) = source_url {
+						if let Some(inner_object) = event_obj
+							.as_object_mut()
+							.and_then(|event_obj_map| event_obj_map.get_mut("event_properties"))
+							.and_then(|event_properties| event_properties.as_object_mut())
+						{
+							inner_object.insert("url".into(), Value::String(uri.to_string()));
+							inner_object.insert(
+								"hostname".into(),
+								Value::String(
+									uri.parse::<Uri>()
+										.ok()
+										.and_then(|u| u.host().map(|h| h.to_string()))
+										.unwrap_or_default()
+										.to_owned(),
+								),
+							);
+							inner_object.insert("hostname".into(), hostname.into());
+
+							// Only set "[Amplitude] Page Path" if it doesn't already exist, the new client often sets this
+							inner_object
+								.entry("[Amplitude] Page Path".to_string())
+								.or_insert_with(|| {
+									// Try parsing the URI's path, or fallback to `platform` or an empty string if all else fails
+									Value::String(
+										uri.to_owned()
+											.parse::<Uri>()
+											.ok()
+											.map(|parsed_uri| parsed_uri.path().to_string())
+											.or_else(|| platform.clone())
+											.unwrap_or_else(|| "".to_string()),
+									)
+								});
+						}
+					}
 				});
+			};
 		},
 
 		Value::Array(arr) => {
@@ -328,8 +332,6 @@ mod tests {
 
 	#[test]
 	fn test_with_urls_doesnt_update_existing_url_properties() {
-		let url_str = "https://design.nav.no/foo/bar?query=param";
-
 		let hostname = "hostname";
 		let mut event = json!({
 			"events": [{

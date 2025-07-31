@@ -1,3 +1,9 @@
+use std::collections::HashMap;
+use std::net::ToSocketAddrs;
+use std::str::FromStr;
+use std::sync::atomic::Ordering;
+use std::time::Duration;
+
 use async_trait::async_trait;
 use bytes::Bytes;
 use http::Uri;
@@ -9,19 +15,13 @@ use pingora::{
 	prelude::HttpPeer,
 	proxy::{ProxyHttp, Session},
 };
-use redact::redact_uri;
 use serde_json::{Value, json};
-use std::collections::HashMap;
-use std::net::ToSocketAddrs;
-use std::str::FromStr;
-use std::sync::atomic::Ordering;
 use tokio::time;
-use tracing::{error, info, trace, warn};
+use tracing::{error, trace, warn};
 mod annotate;
 mod redact;
 mod route;
 use isbot::Bots;
-use std::time::Duration;
 use url::Url;
 
 use crate::config::Config;
@@ -261,7 +261,7 @@ impl ProxyHttp for AmplitudeProxy {
 				//				annotate::with_hostname(&mut json, ctx.host.as_ref());
 				redact::traverse_and_redact(&mut json);
 
-				annotate_with_nav_extras(&self.conf, &mut json, &ctx);
+				annotate_with_nav_extras(&self.conf, &mut json, ctx);
 				// This uses exactly "event_properties, which maybe only amplitude has"
 				if let Some(loc) = &ctx.location {
 					annotate::with_location(&mut json, &loc.city, &loc.country);
@@ -316,7 +316,7 @@ impl ProxyHttp for AmplitudeProxy {
 
 	fn response_body_filter(
 		&self,
-		session: &mut Session,
+		_session: &mut Session,
 		body: &mut Option<Bytes>,
 		end_of_stream: bool,
 		ctx: &mut Self::CTX,
@@ -335,6 +335,7 @@ impl ProxyHttp for AmplitudeProxy {
 		}
 		Ok(None)
 	}
+
 	async fn upstream_request_filter(
 		&self,
 		_session: &mut Session,
@@ -426,6 +427,7 @@ impl ProxyHttp for AmplitudeProxy {
 		PROXY_ERRORS.with_label_values(&[(error.as_str())]).inc();
 	}
 }
+
 fn parse_url_encoded(data: &str) -> Result<Value, pingora::Error> {
 	let parsed: HashMap<String, String> = serde_urlencoded::from_str(data)
 		.explain_err(
@@ -441,6 +443,7 @@ fn parse_url_encoded(data: &str) -> Result<Value, pingora::Error> {
 
 	Ok(json!({ "events": events_data, "api_key": client }))
 }
+
 fn annotate_with_nav_extras(conf: &Config, json: &mut Value, ctx: &Ctx) {
 	let platform = get_source_name(json)
 		.or_else(|| get_platform(json))
@@ -517,37 +520,26 @@ fn get_source_name(value: &Value) -> Option<String> {
 						let scheme = url.scheme();
 						let host = url.host_str().unwrap_or("");
 						let path = url.path();
-						format!("{}://{}{}", scheme, host, path)
+						format!("{scheme}://{host}{path}")
 					})
 			})
 		})
-}
-
-fn categorize_other_environment(host: String, environments: &[String]) -> String {
-	if environments.iter().any(|env| host.ends_with(env)) {
-		"dev".into()
-	} else if host.contains("localhost") {
-		"localhost".into()
-	} else {
-		"other".into()
-	}
-}
-
-fn is_using_new_sdk(event: &Value) -> bool {
-	if let Some(body) = event.get("body") {
-		if body.get("events").is_some() && body.get("api_key").is_some() {
-			return true;
-		} else if body.get("e").is_some() && body.get("client").is_some() {
-			return false;
-		}
-	}
-	false
 }
 
 #[cfg(test)]
 mod tests {
 	use super::*;
 	use serde_json::{Value, json};
+
+	fn categorize_other_environment(host: String, environments: &[String]) -> String {
+		if environments.iter().any(|env| host.ends_with(env)) {
+			"dev".into()
+		} else if host.contains("localhost") {
+			"localhost".into()
+		} else {
+			"other".into()
+		}
+	}
 
 	#[test]
 	fn test_categorize_environment_dev() {
