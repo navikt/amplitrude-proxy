@@ -43,13 +43,13 @@
         commonArgs = {
           inherit pname src;
 
-          buildInputs = with pkgs; [ openssl ];
+          buildInputs = [ pkgs.openssl ];
           nativeBuildInputs =
             with pkgs;
             [
-              pkg-config
               cmake
               perl
+              pkg-config
             ]
             ++ lib.optionals stdenv.isDarwin [
               darwin.apple_sdk.frameworks.Security
@@ -121,16 +121,14 @@
           };
         };
         devShells.default = craneLib.devShell {
+          inputsFrom = builtins.attrValues self.checks.${system};
           packages =
             with pkgs;
             [
-              cmake
               socat
-              hivemind
               k6
 
               # Cargo plugins/utils
-              cargo-audit
               cargo-auditable
               cargo-deny
               cargo-outdated
