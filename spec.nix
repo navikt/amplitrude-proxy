@@ -52,7 +52,6 @@ let
         ];
       };
       resources = {
-        limits.memory = "2048Mi";
         requests = {
           cpu = "250m";
           memory = "256Mi";
