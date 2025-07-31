@@ -197,6 +197,7 @@ impl ProxyHttp for AmplitudeProxy {
 		));
 
 		peer.options.tcp_keepalive = Some(pingora::protocols::TcpKeepalive {
+			user_timeout: std::time::Duration::from_secs(120),
 			idle: std::time::Duration::from_secs(120),
 			interval: std::time::Duration::from_secs(5),
 			count: 3,
