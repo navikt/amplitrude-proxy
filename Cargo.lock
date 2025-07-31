@@ -79,7 +79,6 @@ dependencies = [
  "k8s-openapi",
  "kube",
  "lru 0.12.5",
- "once_cell",
  "pingora",
  "prometheus 0.14.0",
  "ptrie",

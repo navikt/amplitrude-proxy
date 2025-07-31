@@ -1,19 +1,19 @@
+use std::sync::atomic::AtomicBool;
+use std::sync::{Arc, LazyLock, Mutex};
+
 use lru::LruCache;
-use once_cell::sync::Lazy;
 use ptrie::Trie;
 use std::num::NonZeroUsize;
-use std::sync::atomic::AtomicBool;
-use std::sync::{Arc, Mutex};
 
-pub static CACHE: Lazy<Arc<Mutex<LruCache<String, AppInfo>>>> = Lazy::new(|| {
+pub static CACHE: LazyLock<Arc<Mutex<LruCache<String, AppInfo>>>> = LazyLock::new(|| {
 	Arc::new(Mutex::new(LruCache::new(
 		NonZeroUsize::new(2000).expect("cache has positive capacity"),
 	)))
 });
 
 // Would it make sense to prefix-lookup on appInfo records instead? Can I do that? This only exists for longest-prefix matching
-pub static PREFIX_TRIE: Lazy<Arc<Mutex<Trie<u8, String>>>> =
-	Lazy::new(|| Arc::new(Mutex::new(Trie::new())));
+pub static PREFIX_TRIE: LazyLock<Arc<Mutex<Trie<u8, String>>>> =
+	LazyLock::new(|| Arc::new(Mutex::new(Trie::new())));
 
 // This keeps tracks of if the k8s exfiltration thread has spawned
 // AtomicBool uses atomic operations provided by the CPU to ensure that reads and writes to the boolean value are indivisible (i.e atomic!). This means that no thread can see a partially-updated value. Its pretty neat. imho

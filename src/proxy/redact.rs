@@ -1,18 +1,17 @@
 use std::collections::HashSet;
+use std::sync::LazyLock;
 
 use http::{Uri, uri::InvalidUri};
-use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::Value;
-use url::Url;
 
-static KEEP_REGEX: Lazy<regex::Regex> = Lazy::new(|| {
+static KEEP_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {
 	Regex::new(r"((nav|test)[0-9]{6})").expect("Hard-coded regex expression should be valid")
 });
-static HEX_REGEX: Lazy<regex::Regex> = Lazy::new(|| {
+static HEX_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {
 	Regex::new(r"[a-f0-9\-]{6,}").expect("Hard-coded regex expression should be valid")
 });
-static ID_REGEX: Lazy<regex::Regex> = Lazy::new(|| {
+static ID_REGEX: LazyLock<regex::Regex> = LazyLock::new(|| {
 	Regex::new(r"\d[oiA-Z0-9]{8,}").expect("Hard-coded regex expression should be valid")
 });
 
