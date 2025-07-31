@@ -6,14 +6,10 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     # Rust compile stuff
-    crane = {
-      url = "github:ipetkov/crane";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    crane.url = "github:ipetkov/crane";
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
     };
 
     # Rust 3rd party tooling
@@ -36,7 +32,7 @@
           (p: p.rust-bin.stable.latest.default);
 
         # Common vars
-        cargoDetails = pkgs.lib.importTOML ./Cargo.toml;
+        cargoDetails = lib.importTOML ./Cargo.toml;
         pname = cargoDetails.package.name;
         src = craneLib.cleanCargoSource (craneLib.path ./.);
         commonArgs = {
