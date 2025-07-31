@@ -52,6 +52,7 @@ let
         ];
       };
       resources = {
+        limits.memory = "8192Mi"; # Set it ridiculously high so it never hits
         requests = {
           cpu = "250m";
           memory = "256Mi";
