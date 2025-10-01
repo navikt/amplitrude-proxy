@@ -12,7 +12,6 @@ mod trace;
 fn main() {
 	let conf = config::Config::new();
 	trace::init();
-	metrics::init_metrics();
 	info!("started proxy{:#?}", &conf);
 	let mut amplitrude_proxy = Server::new(Some(Opt {
 		upgrade: false,

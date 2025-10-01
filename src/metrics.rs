@@ -48,21 +48,3 @@ pub static REQUEST_DURATION: LazyLock<Histogram> = LazyLock::new(|| {
 		]);
 	register_histogram!(opts).unwrap()
 });
-
-/// Initialize all metrics by accessing them once.
-/// This forces the LazyLock to register the metrics with the global Prometheus registry.
-pub fn init_metrics() {
-	// Access all LazyLock metrics to force their initialization and registration
-	let _ = &*INCOMING_REQUESTS;
-	let _ = &*HANDLED_REQUESTS;
-	let _ = &*PROXY_ERRORS;
-	let _ = &*DEFAULT_KEY;
-	let _ = &*INVALID_PEER;
-	let _ = &*INGRESS_COUNT;
-	let _ = &*UPSTREAM_500;
-	let _ = &*UPSTREAM_400;
-	let _ = &*UPSTREAM_200;
-	let _ = &*COLLECT;
-	let _ = &*COLLECT_AUTO;
-	let _ = &*REQUEST_DURATION;
-}
