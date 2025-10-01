@@ -14,7 +14,7 @@ k8s-openapi = { version = "0.23.0", features = ["v1_30"] }
 kube = { version = "0.96.0", default-features = false, features = ["client", "rustls-tls", "derive", "runtime"] }
 lru = "0.12.4"
 pingora = { version = "0.5", features = ["proxy", "cache", "openssl"] }
-prometheus = "0.14"
+prometheus = "0.13"
 ptrie = "0.7"
 regex = "1"
 schemars = "0.8.21"
